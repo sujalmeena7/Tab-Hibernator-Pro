@@ -24,13 +24,43 @@
     document.addEventListener(e, onActivity, { passive: true, capture: true });
   });
 
+  /**
+   * Smart form detection: only block hibernation for inputs that actually
+   * contain user-typed content. Search bars and empty fields are ignored.
+   */
   function checkFormInput() {
     const el = document.activeElement;
     if (!el) { updateFormInput(false); return; }
     const tag = el.tagName.toLowerCase();
-    const isInput = (tag === 'input' && !['checkbox','radio','submit','button','hidden','reset','image'].includes(el.type))
-      || tag === 'textarea' || tag === 'select' || el.isContentEditable;
-    updateFormInput(isInput);
+
+    // ContentEditable elements (rich text editors, Gmail compose, etc.)
+    if (el.isContentEditable) {
+      const hasContent = (el.innerText || '').trim().length > 0;
+      updateFormInput(hasContent);
+      return;
+    }
+
+    // Textareas — only block if they have typed content
+    if (tag === 'textarea') {
+      updateFormInput((el.value || '').trim().length > 0);
+      return;
+    }
+
+    // Input fields — filter out non-text types and search bars
+    if (tag === 'input') {
+      const type = (el.type || 'text').toLowerCase();
+      const ignoredTypes = ['checkbox','radio','submit','button','hidden','reset','image','search','range','color','file'];
+      if (ignoredTypes.includes(type)) {
+        updateFormInput(false);
+        return;
+      }
+      // Only block if the field actually has content typed in it
+      updateFormInput((el.value || '').trim().length > 0);
+      return;
+    }
+
+    // Select dropdowns — never block (user can re-select easily)
+    updateFormInput(false);
   }
 
   function updateFormInput(value) {
