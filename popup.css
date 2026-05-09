@@ -227,3 +227,47 @@ body {
   opacity: 0.4;
   pointer-events: none;
 }
+
+/* ── Buy Me a Coffee ── */
+.coffee-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px 14px;
+  border-top: 1px solid var(--border);
+  margin-top: 4px;
+}
+
+.coffee-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 16px;
+  background: linear-gradient(135deg, #ffdd57, #f5a623);
+  color: #1a1a1a;
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 20px;
+  text-decoration: none;
+  transition: transform 0.15s, box-shadow 0.2s;
+}
+
+.coffee-btn:hover {
+  transform: scale(1.04);
+  box-shadow: 0 0 12px rgba(245, 166, 35, 0.35);
+}
+
+.coffee-icon {
+  width: 14px;
+  height: 14px;
+  stroke: #1a1a1a;
+}
+
+.coffee-text {
+  font-size: 10px;
+  color: var(--muted);
+  text-align: center;
+  margin: 0;
+  line-height: 1.4;
+}
