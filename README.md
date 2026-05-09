@@ -58,5 +58,11 @@ The extension offers a clean options page to customize your experience:
 ---
 
 <p align="center">
-  Developed by <a href="https://github.com/sujalmeena7">sujalmeena7</a>
+  <a href="https://ko-fi.com/sujalmeena">
+    <img src="https://ko-fi.com/img/githubbutton_sm.svg" alt="Support me on Ko-fi" />
+  </a>
+</p>
+
+<p align="center">
+  Developed with ❤️ by <a href="https://github.com/sujalmeena7">sujalmeena7</a>
 </p>

@@ -70,7 +70,7 @@
   // Buy Me a Coffee — opens in a new tab (avoids CSP issues with external images)
   document.getElementById('coffeeLink').addEventListener('click', (e) => {
     e.preventDefault();
-    chrome.tabs.create({ url: 'https://buymeacoffee.com/sujalmeena7' });
+    chrome.tabs.create({ url: 'https://ko-fi.com/sujalmeena' });
   });
 
   // Helper
