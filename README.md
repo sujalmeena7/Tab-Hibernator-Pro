@@ -1,68 +1,62 @@
-# 💤 Tab Hibernator Pro
+<p align="center">
+  <img src="https://raw.githubusercontent.com/sujalmeena7/Tab-Hibernator-Pro/main/icons/icon128.png" width="80" alt="Tab Hibernator Pro Logo" />
+</p>
 
-[![Version](https://img.shields.io/badge/version-1.0.0-teal.svg?style=for-the-badge)](https://github.com/sujalmeena7/Tab-Hibernator-Pro)
-[![Manifest](https://img.shields.io/badge/Manifest-V3-orange.svg?style=for-the-badge)](https://developer.chrome.com/docs/extensions/mv3/intro/)
-[![License](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE)
+<h1 align="center">Tab Hibernator Pro</h1>
 
-**Tab Hibernator Pro** is a lightweight, high-performance Chrome extension designed to reclaim your system memory by intelligently suspending inactive tabs. Built with **Manifest V3** and zero external dependencies, it offers a privacy-first, trustworthy alternative to bloated tab managers.
+<p align="center">
+  <strong>Intelligent Tab Suspension & RAM Recovery Engine</strong>
+</p>
 
----
-
-## ✨ Key Features
-
-- **🚀 Smart Auto-Suspension**: Automatically hibernates tabs after a user-defined period (5m - 4h) using the robust `chrome.alarms` API.
-- **🛡️ Intelligent Exclusions**: 
-  - Never suspends **pinned tabs**.
-  - Detects **active audio/video** (YouTube, Spotify, etc.) and keeps them alive.
-  - Detects **active form inputs** (Gmail, Reddit, etc.) to prevent data loss.
-  - Whitelist your favorite domains.
-- **💾 RAM Recovery**: Saves an estimated **~80MB per hibernated tab**.
-- **🔄 Instant Restore**: Click "Wake this tab" to restore precisely where you left off, including **scroll position**.
-- **🌑 Premium Dark Mode**: Beautiful, modern UI for both the popup and options page.
-- **🔒 Privacy-First**: 100% local processing. No analytics, no tracking, and no external API calls.
+<p align="center">
+  <img src="https://img.shields.io/badge/JavaScript-ES6+-yellow?style=flat-square" alt="JavaScript" />
+  <img src="https://img.shields.io/badge/Manifest-V3-orange?style=flat-square" alt="Manifest V3" />
+  <img src="https://img.shields.io/badge/Chrome-Extension-blue?style=flat-square" alt="Chrome Extension" />
+  <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="License" />
+</p>
 
 ---
 
-## 🛠️ Installation (Developer Mode)
-
-Until the extension is available on the Chrome Web Store, you can load it manually:
-
-1.  **Clone the Repository**:
-    ```bash
-    git clone https://github.com/sujalmeena7/Tab-Hibernator-Pro.git
-    ```
-2.  **Open Chrome Extensions**: Navigate to `chrome://extensions/`.
-3.  **Enable Developer Mode**: Toggle the switch in the top-right corner.
-4.  **Load Unpacked**: Click "Load unpacked" and select the project folder.
+**Tab Hibernator Pro** is a high-performance, privacy-first browser extension that intelligently suspends inactive tabs to reclaim system memory. Built using a modern Manifest V3 architecture, it features a smart exclusion engine that detects audio, video, and active form inputs to ensure zero data loss while keeping your browser blazing fast.
 
 ---
 
-## 📸 Preview
+## ✨ Features
 
-| Popup Dashboard | Settings Page |
-| :---: | :---: |
-| ![Popup Preview](https://raw.githubusercontent.com/sujalmeena7/Tab-Hibernator-Pro/main/preview_popup.png) | ![Options Preview](https://raw.githubusercontent.com/sujalmeena7/Tab-Hibernator-Pro/main/preview_options.png) |
-
-*(Note: Add your own screenshots to the repo and update these links!)*
-
----
-
-## 🧠 Technical Architecture
-
-Tab Hibernator Pro uses a highly efficient **Single-Alarm Architecture** to solve common Manifest V3 service worker sleep issues:
-
-- **Background Worker**: Manages a single repeating 1-minute alarm that sweeps all tabs, comparing `lastActivity` timestamps stored in `chrome.storage.local`.
-- **Content Script**: Lightweight observer that reports user activity and form-focus state without impacting page performance.
-- **Storage**: Uses `chrome.storage.local` to persist tab state across browser restarts.
+- **🚀 Smart Inactivity Detection**: Uses a robust single-alarm background sweep (1-min intervals) to monitor tab idle time.
+- **🛡️ Advanced Exclusions**: 
+  - **Audio/Video**: Never suspends playing media (YouTube, Spotify, etc.).
+  - **Form Input**: Detects active typing/focus in forms to prevent losing progress.
+  - **System Pages**: Ignores pinned tabs and internal browser pages.
+- **💾 Estimated Savings**: Displays real-time RAM recovery stats (~80MB per tab).
+- **🔄 State Persistence**: Instantly restore tabs with original URL, title, and **scroll position**.
+- **🌑 Modern UI**: Premium dark-mode dashboard and settings page with vanilla CSS glassmorphism.
 
 ---
 
-## 📄 License
+## 🛠️ Installation
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+1. **Clone the repo**:
+   ```bash
+   git clone https://github.com/sujalmeena7/Tab-Hibernator-Pro.git
+   ```
+2. **Load in Chrome**:
+   - Open `chrome://extensions/`
+   - Enable **Developer Mode**
+   - Click **Load unpacked** and select the project directory.
+
+---
+
+## ⚙️ Configuration
+
+The extension offers a clean options page to customize your experience:
+- **Timeout Slider**: Set inactivity limits from 5 minutes to 4 hours.
+- **Whitelist**: Define specific domains to never hibernate.
+- **Battery Saver**: (Optional) Only hibernate when your device is unplugged.
+- **Badge Toggle**: Show/hide the hibernation count on the toolbar icon.
 
 ---
 
 <p align="center">
-  Made with ❤️ by <a href="https://github.com/sujalmeena7">sujalmeena7</a>
+  Developed by <a href="https://github.com/sujalmeena7">sujalmeena7</a>
 </p>
