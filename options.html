@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tab Hibernator Pro — Settings</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="options-wrapper">
+    <div class="options-container">
+      <!-- Header -->
+      <div class="options-header">
+        <div class="header-brand">
+          <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/>
+          </svg>
+          <div>
+            <h1>Tab Hibernator Pro</h1>
+            <p class="subtitle">Settings</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Inactivity Timeout -->
+      <section class="settings-section">
+        <h2>Inactivity Timeout</h2>
+        <p class="section-desc">Tabs inactive longer than this will be hibernated.</p>
+        <div class="slider-group">
+          <input type="range" id="timeoutSlider" min="5" max="240" step="5" value="30">
+          <span class="slider-value" id="timeoutValue">30 min</span>
+        </div>
+      </section>
+
+      <!-- Toggles -->
+      <section class="settings-section">
+        <h2>Behavior</h2>
+
+        <div class="setting-row">
+          <div class="setting-info">
+            <span class="setting-label">Battery saver mode only</span>
+            <span class="setting-hint">Only hibernate tabs when device is on battery power</span>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="batterySaver">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-info">
+            <span class="setting-label">Show memory savings badge</span>
+            <span class="setting-hint">Display hibernated tab count on the extension icon</span>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="showBadge" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-info">
+            <span class="setting-label">Restore tabs on browser restart</span>
+            <span class="setting-hint">Automatically wake all hibernated tabs when Chrome starts</span>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="restoreOnRestart">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </section>
+
+      <!-- Whitelist -->
+      <section class="settings-section">
+        <h2>Whitelisted Domains</h2>
+        <p class="section-desc">Tabs on these domains will never be hibernated. One domain per line.</p>
+        <textarea id="whitelist" rows="6" placeholder="example.com&#10;mail.google.com&#10;github.com"></textarea>
+      </section>
+
+      <!-- Save -->
+      <div class="save-bar">
+        <span class="save-status" id="saveStatus"></span>
+        <button class="btn-save" id="saveBtn">Save Settings</button>
+      </div>
+    </div>
+  </div>
+  <script src="options.js"></script>
+</body>
+</html>

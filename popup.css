@@ -1,0 +1,229 @@
+/* popup.css — Tab Hibernator Pro Popup Styles */
+
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --bg: #0f1117;
+  --card: #181b23;
+  --card-accent: #131820;
+  --border: #2a2d38;
+  --text: #e4e6ed;
+  --muted: #7a7f8d;
+  --accent: #1D9E75;
+  --accent-hover: #25c48f;
+  --accent-dim: rgba(29, 158, 117, 0.12);
+  --danger: #e05252;
+  --radius: 10px;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  width: 320px;
+  min-height: 100px;
+}
+
+.popup-container {
+  padding: 16px;
+}
+
+/* ── Header ── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.logo-icon {
+  width: 20px;
+  height: 20px;
+  color: var(--accent);
+}
+
+.header-title {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+/* ── Toggle Switch ── */
+.toggle-switch {
+  position: relative;
+  width: 40px;
+  height: 22px;
+  cursor: pointer;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-switch .slider {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: var(--border);
+  border-radius: 22px;
+  transition: background 0.25s;
+}
+
+.toggle-switch .slider::before {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  left: 3px;
+  bottom: 3px;
+  background: var(--muted);
+  border-radius: 50%;
+  transition: transform 0.25s, background 0.25s;
+}
+
+.toggle-switch input:checked + .slider {
+  background: var(--accent);
+}
+
+.toggle-switch input:checked + .slider::before {
+  transform: translateX(18px);
+  background: #fff;
+}
+
+/* ── Stats Grid ── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.stat-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px;
+  text-align: center;
+}
+
+.stat-card.accent {
+  background: var(--accent-dim);
+  border-color: rgba(29, 158, 117, 0.25);
+}
+
+.stat-card.wide {
+  grid-column: 1 / -1;
+  background: linear-gradient(135deg, var(--card) 0%, var(--accent-dim) 100%);
+  border-color: rgba(29, 158, 117, 0.2);
+}
+
+.stat-value {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.stat-card.accent .stat-value {
+  color: var(--accent);
+}
+
+.stat-card.wide .stat-value {
+  color: var(--accent);
+  font-size: 20px;
+}
+
+.stat-label {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ── Action Buttons ── */
+.actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.btn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+
+.btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: var(--accent-hover);
+}
+
+.btn-secondary {
+  background: var(--card);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.btn-secondary:hover {
+  background: var(--border);
+}
+
+/* ── Footer ── */
+.footer {
+  text-align: center;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+
+.footer a {
+  font-size: 12px;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.footer a:hover {
+  color: var(--accent);
+}
+
+/* ── Disabled state overlay ── */
+.popup-container.disabled .stats-grid,
+.popup-container.disabled .actions {
+  opacity: 0.4;
+  pointer-events: none;
+}

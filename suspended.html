@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tab Hibernated</title>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0f1117;
+      --card: #181b23;
+      --border: #2a2d38;
+      --text: #e4e6ed;
+      --muted: #7a7f8d;
+      --accent: #1D9E75;
+      --accent-hover: #25c48f;
+    }
+
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #f4f5f7;
+        --card: #ffffff;
+        --border: #dde0e6;
+        --text: #1a1c24;
+        --muted: #6b7080;
+      }
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    .container {
+      text-align: center;
+      max-width: 480px;
+      width: 100%;
+    }
+
+    .icon-wrap {
+      margin-bottom: 24px;
+    }
+
+    .icon-wrap img {
+      width: 48px;
+      height: 48px;
+      border-radius: 8px;
+      opacity: 0.7;
+    }
+
+    .icon-wrap .fallback-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 8px;
+      background: var(--border);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      color: var(--muted);
+    }
+
+    h1 {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      line-height: 1.4;
+      word-break: break-word;
+    }
+
+    .url {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 8px;
+      word-break: break-all;
+      max-height: 40px;
+      overflow: hidden;
+    }
+
+    .time-ago {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 32px;
+    }
+
+    .time-ago .dot {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      background: var(--accent);
+      border-radius: 50%;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+
+    .wake-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 40px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+    }
+
+    .wake-btn:hover {
+      background: var(--accent-hover);
+      transform: translateY(-1px);
+    }
+
+    .wake-btn:active {
+      transform: translateY(0);
+    }
+
+    .wake-btn svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .brand {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 11px;
+      color: var(--muted);
+      opacity: 0.5;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="icon-wrap" id="iconWrap"></div>
+    <h1 id="pageTitle">Tab Hibernated</h1>
+    <p class="url" id="pageUrl"></p>
+    <p class="time-ago" id="timeAgo"><span class="dot"></span>Hibernated just now</p>
+    <button class="wake-btn" id="wakeBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M23 12l-7-7v4C7 9 4 14 3 19c2.5-3.5 6-5.1 13-5.1v4l7-7z"/>
+      </svg>
+      Wake this tab
+    </button>
+  </div>
+  <div class="brand">Tab Hibernator Pro</div>
+  <script src="suspended.js"></script>
+</body>
+</html>

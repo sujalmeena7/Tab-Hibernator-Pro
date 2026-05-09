@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tab Hibernator Pro</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="popup-container">
+    <!-- Header -->
+    <div class="header">
+      <div class="header-left">
+        <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/>
+        </svg>
+        <span class="header-title">Tab Hibernator</span>
+      </div>
+      <label class="toggle-switch" id="enableToggle" title="Enable / Disable">
+        <input type="checkbox" id="enableCheckbox">
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value" id="activeTabs">0</div>
+        <div class="stat-label">Active</div>
+      </div>
+      <div class="stat-card accent">
+        <div class="stat-value" id="hibernatedTabs">0</div>
+        <div class="stat-label">Hibernated</div>
+      </div>
+      <div class="stat-card wide">
+        <div class="stat-value" id="memorySaved">~0 MB</div>
+        <div class="stat-label">Memory Saved</div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="actions">
+      <button class="btn btn-primary" id="hibernateAllBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg>
+        Hibernate All
+      </button>
+      <button class="btn btn-secondary" id="wakeAllBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        Wake All
+      </button>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <a href="#" id="optionsLink">⚙ Settings</a>
+    </div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>
