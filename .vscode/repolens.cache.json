@@ -1,0 +1,16 @@
+{
+  "generatedAt": "2026-06-17T18:27:54.068Z",
+  "language": "Unknown",
+  "framework": "None detected",
+  "testFramework": "None detected",
+  "linter": "None detected",
+  "strictness": "default",
+  "conventions": {
+    "namingConvention": "mixed",
+    "errorHandling": "tryCatch",
+    "importStyle": "not enough data",
+    "asyncPattern": "asyncAwait"
+  },
+  "dependencySnippet": "(no dependency manifest found)",
+  "totalFiles": 5
+}

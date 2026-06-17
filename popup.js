@@ -10,7 +10,11 @@
   const enableCheckbox = document.getElementById('enableCheckbox');
   const hibernateAllBtn = document.getElementById('hibernateAllBtn');
   const wakeAllBtn = document.getElementById('wakeAllBtn');
+  const dashboardBtn = document.getElementById('dashboardBtn');
   const optionsLink = document.getElementById('optionsLink');
+  const stashCurrentBtn = document.getElementById('stashCurrentBtn');
+  const stashGroupBtn = document.getElementById('stashGroupBtn');
+  const stashAllBtn = document.getElementById('stashAllBtn');
   const container = document.querySelector('.popup-container');
 
   // Load stats on popup open
@@ -24,6 +28,12 @@
       memorySaved.textContent = '~' + stats.mbSaved + ' MB';
       enableCheckbox.checked = stats.enabled;
       container.classList.toggle('disabled', !stats.enabled);
+    }
+    
+    // Check if active tab is in a group
+    const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (activeTab && activeTab.groupId !== -1) {
+      stashGroupBtn.style.display = 'inline-flex';
     }
   }
 
@@ -61,16 +71,43 @@
     }, 500);
   });
 
+  // Stash current tab
+  stashCurrentBtn.addEventListener('click', async () => {
+    stashCurrentBtn.disabled = true;
+    stashCurrentBtn.textContent = 'Stashing...';
+    await sendMessage({ action: 'stashCurrentTab' });
+    window.close(); // Close the popup since the tab will close
+  });
+
+  // Stash current group
+  stashGroupBtn.addEventListener('click', async () => {
+    stashGroupBtn.disabled = true;
+    stashGroupBtn.textContent = 'Stashing Group...';
+    await sendMessage({ action: 'stashCurrentGroup' });
+    window.close();
+  });
+
+  // Stash all suspended
+  stashAllBtn.addEventListener('click', async () => {
+    stashAllBtn.disabled = true;
+    stashAllBtn.textContent = 'Stashing...';
+    await sendMessage({ action: 'stashAllSuspended' });
+    setTimeout(() => {
+      loadStats();
+      stashAllBtn.disabled = false;
+      stashAllBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8v13H3V8"></path><polyline points="1 3 23 3 23 8 1 8 1 3"></polyline><line x1="10" y1="12" x2="14" y2="12"></line></svg>Stash All';
+    }, 500);
+  });
+
   // Settings link
   optionsLink.addEventListener('click', (e) => {
     e.preventDefault();
     chrome.runtime.openOptionsPage();
   });
 
-  // Buy Me a Coffee — opens in a new tab (avoids CSP issues with external images)
-  document.getElementById('coffeeLink').addEventListener('click', (e) => {
-    e.preventDefault();
-    chrome.tabs.create({ url: 'https://ko-fi.com/sujalmeena' });
+  // Open Dashboard
+  dashboardBtn.addEventListener('click', () => {
+    chrome.tabs.create({ url: chrome.runtime.getURL('dashboard.html') });
   });
 
   // Helper

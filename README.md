@@ -58,8 +58,8 @@ The extension offers a clean options page to customize your experience:
 ---
 
 <p align="center">
-  <a href="https://ko-fi.com/sujalmeena">
-    <img src="https://ko-fi.com/img/githubbutton_sm.svg" alt="Support me on Ko-fi" />
+  <a href="https://rzp.io/rzp/ihYPBim">
+    <img src="https://img.shields.io/badge/Support-Buy%20me%20a%20coffee-FF6B35?style=for-the-badge&logo=buymeacoffee&logoColor=white" alt="Support the project" />
   </a>
 </p>
 

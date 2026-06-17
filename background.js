@@ -1,39 +1,24 @@
-/**
- * background.js — Tab Hibernator Pro Service Worker
- *
- * Architecture (v2 — fixed):
- *  - ONE persistent repeating alarm: 'hibernation-check' fires every minute.
- *  - Per-tab last-activity timestamps stored in chrome.storage.local.
- *  - On each tick, every tab's idle time is compared against the timeout.
- *  - The alarm is re-created in both onInstalled and onStartup so it survives
- *    service worker restarts (the main MV3 gotcha from v1).
- */
+import { 
+  CHECK_ALARM, CHECK_PERIOD_MINUTES, DEFAULT_SETTINGS, MB_PER_TAB 
+} from './bg/constants.js';
 
-// ─── Constants ───────────────────────────────────────────────────────────────────
+import {
+  garbageCollectStorage, getSettings, initAllTabTimestamps, updateBadge, getTabData, getHibernatedList, reconcileSuspendedTabs
+} from './bg/storage.js';
 
-const CHECK_ALARM = 'hibernation-check';   // Single global repeating alarm
-const CHECK_PERIOD_MINUTES = 1;            // Check every minute
+import { updateTabSnapshot } from './bg/snapshot.js';
 
-const DEFAULT_SETTINGS = {
-  enabled: true,
-  inactivityMinutes: 30,
-  batterySaverOnly: false,
-  showBadge: true,
-  whitelist: [],
-  restoreOnRestart: false
-};
+import {
+  checkAndHibernateTabs, wakeTab, hibernateAllTabs, wakeAllTabs, pendingScrollRestores, suspendTab
+} from './bg/hibernation.js';
 
-const MB_PER_TAB = 80; // Average RAM estimate per tab
-
-// In-memory map for pending scroll restores (best-effort; lost on SW sleep — acceptable)
-const pendingScrollRestores = {};
+import {
+  getStashedTabs, stashTab, restoreStashedTab,
+  getStashedGroups, stashCurrentGroup, restoreStashedGroup, stashTabsAsGroup
+} from './bg/stash.js';
 
 // ─── Alarm Guard Helper ───────────────────────────────────────────────────────────
 
-/**
- * Ensure the single repeating alarm exists. Safe to call multiple times —
- * will not create a duplicate if it already exists.
- */
 function ensureHibernationAlarm() {
   chrome.alarms.get(CHECK_ALARM, (existing) => {
     if (!existing) {
@@ -47,236 +32,52 @@ function ensureHibernationAlarm() {
 
 // ─── Initialization ───────────────────────────────────────────────────────────────
 
-chrome.runtime.onInstalled.addListener(async () => {
-  // Merge defaults with any existing settings (preserves user choices on update)
+chrome.runtime.onInstalled.addListener(async (details) => {
   const existing = await getSettings();
   const merged = { ...DEFAULT_SETTINGS, ...existing };
   await chrome.storage.local.set({ settings: merged });
 
-  // Stamp every open tab with a lastActivity time so we start tracking immediately
   await initAllTabTimestamps();
-
-  // Ensure the global alarm is running
+  await garbageCollectStorage();
+  await reconcileSuspendedTabs();
   ensureHibernationAlarm();
-
   updateBadge();
+
+  // Show changelog on any version change (was hardcoded to 2.0.0).
+  if (details.reason === 'install' || details.reason === 'update') {
+    const currentVersion = chrome.runtime.getManifest().version;
+    const store = await chrome.storage.local.get('lastChangelogVersion');
+    if (store.lastChangelogVersion !== currentVersion) {
+      await chrome.storage.local.set({ lastChangelogVersion: currentVersion });
+      chrome.tabs.create({ url: chrome.runtime.getURL('changelog.html') });
+    }
+  }
 });
 
-/**
- * Service workers can be killed and restarted at any time by Chrome.
- * onStartup fires on browser launch; but we also need the alarm re-registered
- * any time the SW wakes from sleep — ensureHibernationAlarm() handles that
- * idempotently.
- */
 chrome.runtime.onStartup.addListener(async () => {
   const settings = await getSettings();
-
   if (settings.restoreOnRestart) {
     await wakeAllTabs();
   }
-
-  // Re-stamp all open tabs
   await initAllTabTimestamps();
-
-  // Re-register alarm in case it was cleared while browser was closed
+  await garbageCollectStorage();
+  await reconcileSuspendedTabs();
   ensureHibernationAlarm();
-
   updateBadge();
 });
-
-// ─── Settings Helper ──────────────────────────────────────────────────────────────
-
-async function getSettings() {
-  const data = await chrome.storage.local.get('settings');
-  return data.settings || { ...DEFAULT_SETTINGS };
-}
 
 // ─── Global Repeating Alarm Handler ──────────────────────────────────────────────
 
-/**
- * Every minute: scan all tabs and suspend any that have been idle long enough.
- */
 chrome.alarms.onAlarm.addListener(async (alarm) => {
   if (alarm.name !== CHECK_ALARM) return;
-
   const settings = await getSettings();
   if (!settings.enabled) return;
-
   await checkAndHibernateTabs(settings);
 });
 
-/**
- * Core check: iterate all tabs, compare idle time vs. threshold, suspend eligible ones.
- */
-async function checkAndHibernateTabs(settings) {
-  const tabs = await chrome.tabs.query({});
-  const nowMs = Date.now();
-  const thresholdMs = (settings.inactivityMinutes || 30) * 60 * 1000;
+// ─── Scroll Restore & Snapshot Triggers ──────────────────────────────────────────
 
-  for (const tab of tabs) {
-    const eligible = await canSuspendTab(tab, settings);
-    if (!eligible) continue;
-
-    // Read last-activity timestamp from storage
-    const tabData = await getTabData(tab.id);
-    const lastActivity = tabData?.lastActivity || tabData?.createdAt || nowMs;
-    const idleMs = nowMs - lastActivity;
-
-    if (idleMs >= thresholdMs) {
-      await suspendTab(tab);
-    }
-  }
-}
-
-// ─── Tab Activity Stamping ────────────────────────────────────────────────────────
-
-/**
- * Stamp every currently open tab with the current time as its lastActivity,
- * so the countdown starts from now.
- */
-async function initAllTabTimestamps() {
-  const tabs = await chrome.tabs.query({});
-  const now = Date.now();
-  const updates = {};
-  for (const tab of tabs) {
-    if (!tab.url) continue;
-    if (tab.url.startsWith('chrome://') || tab.url.startsWith('chrome-extension://')) continue;
-    const key = 'tabdata-' + tab.id;
-    // Don't overwrite existing data — only set if missing
-    const existing = await getTabData(tab.id);
-    if (!existing) {
-      updates[key] = { createdAt: now, lastActivity: now, scrollY: 0, hasFormInput: false };
-    }
-  }
-  if (Object.keys(updates).length > 0) {
-    await chrome.storage.local.set(updates);
-  }
-}
-
-// ─── Suspension Logic ─────────────────────────────────────────────────────────────
-
-/**
- * Check all exclusion rules. Returns true if the tab may be suspended.
- */
-async function canSuspendTab(tab, settings) {
-  if (!settings.enabled) return false;
-  if (tab.pinned) return false;
-  if (tab.active) return false;
-  if (tab.audible) return false;
-
-  if (!tab.url) return false;
-  const url = tab.url;
-
-  // Skip internal/system pages
-  if (url.startsWith('chrome://') || url.startsWith('edge://') ||
-      url.startsWith('chrome-extension://') || url.startsWith('about:') ||
-      url.startsWith('devtools://') || url.startsWith('data:')) {
-    return false;
-  }
-
-  // Skip already-suspended tabs
-  if (url.startsWith(chrome.runtime.getURL('suspended.html'))) return false;
-
-  // Skip whitelisted domains
-  try {
-    const parsed = new URL(url);
-    const domain = parsed.hostname.replace(/^www\./, '');
-    const wl = settings.whitelist || [];
-    if (wl.some(w => w && domain.includes(w.trim().toLowerCase()))) {
-      return false;
-    }
-  } catch (e) {
-    return false; // Unparseable URL — skip
-  }
-
-  // Skip tabs younger than 5 minutes
-  const tabData = await getTabData(tab.id);
-  if (tabData?.createdAt) {
-    const ageMs = Date.now() - tabData.createdAt;
-    if (ageMs < 5 * 60 * 1000) return false;
-  }
-
-  // Skip tabs with active form input (reported by content script)
-  if (tabData?.hasFormInput) return false;
-
-  return true;
-}
-
-/**
- * Suspend a tab: save its state, navigate to suspended.html.
- */
-async function suspendTab(tab) {
-  const tabData = await getTabData(tab.id);
-  const scrollY = tabData?.scrollY || 0;
-  const favicon = tab.favIconUrl || '';
-
-  const suspendedInfo = {
-    url: tab.url,
-    title: tab.title || 'Untitled',
-    favicon: favicon,
-    scrollY: scrollY,
-    suspendedAt: Date.now(),
-    tabId: tab.id
-  };
-
-  // Persist the suspended tab's original data
-  await chrome.storage.local.set({ ['suspended-' + tab.id]: suspendedInfo });
-  await addToHibernatedList(tab.id);
-
-  // Build the local suspended page URL
-  const params = new URLSearchParams({
-    tabId: tab.id.toString(),
-    title: suspendedInfo.title,
-    url: suspendedInfo.url,
-    favicon: suspendedInfo.favicon,
-    suspendedAt: suspendedInfo.suspendedAt.toString()
-  });
-
-  const suspendedUrl = chrome.runtime.getURL('suspended.html') + '?' + params.toString();
-  await chrome.tabs.update(tab.id, { url: suspendedUrl });
-
-  updateBadge();
-}
-
-/**
- * Wake (restore) a suspended tab back to its original URL.
- */
-async function wakeTab(tabId) {
-  const key = 'suspended-' + tabId;
-  const data = await chrome.storage.local.get(key);
-  const info = data[key];
-
-  if (!info?.url) return;
-
-  // Navigate back
-  await chrome.tabs.update(tabId, { url: info.url });
-
-  // Clean up
-  await chrome.storage.local.remove(key);
-  await removeFromHibernatedList(tabId);
-
-  // Queue scroll restore (best-effort)
-  if (info.scrollY > 0) {
-    pendingScrollRestores[tabId] = info.scrollY;
-  }
-
-  // Re-stamp lastActivity so the tab's timer starts fresh
-  await chrome.storage.local.set({
-    ['tabdata-' + tabId]: {
-      createdAt: Date.now(),
-      lastActivity: Date.now(),
-      scrollY: 0,
-      hasFormInput: false
-    }
-  });
-
-  updateBadge();
-}
-
-// ─── Scroll Restore ───────────────────────────────────────────────────────────────
-
-chrome.tabs.onUpdated.addListener(async (tabId, changeInfo) => {
-  // Restore scroll position once the page finishes loading
+chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   if (changeInfo.status === 'complete' && pendingScrollRestores[tabId] !== undefined) {
     const scrollY = pendingScrollRestores[tabId];
     delete pendingScrollRestores[tabId];
@@ -287,129 +88,78 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo) => {
         args: [scrollY]
       });
     } catch (e) {
-      // Tab may not allow scripting (e.g. PDF, protected page) — ignore
+      // Ignore
     }
   }
 
-  // When a tab finishes loading a new real page, stamp its lastActivity
   if (changeInfo.status === 'complete') {
+    if (tab && tab.active) {
+      const settings = await getSettings();
+      if (settings.snapshotsEnabled) {
+        updateTabSnapshot(tab.windowId, tabId);
+      }
+    }
     try {
-      const tab = await chrome.tabs.get(tabId);
-      if (tab.url && !tab.url.startsWith('chrome://') &&
-          !tab.url.startsWith('chrome-extension://') &&
-          !tab.url.startsWith(chrome.runtime.getURL('suspended.html'))) {
+      const t = tab || await chrome.tabs.get(tabId);
+      if (t.url && !t.url.startsWith('chrome://') &&
+          !t.url.startsWith('chrome-extension://') &&
+          !t.url.startsWith(chrome.runtime.getURL('suspended.html'))) {
         const key = 'tabdata-' + tabId;
         const existing = await getTabData(tabId);
-        // Reset timestamp on navigation to a new URL
+        // Only treat a finished load as fresh activity for the active tab.
+        // Otherwise auto-refreshing background tabs would never become eligible.
+        const lastActivity = t.active
+          ? Date.now()
+          : (existing?.lastActivity || existing?.createdAt || Date.now());
         await chrome.storage.local.set({
           [key]: {
             createdAt: existing?.createdAt || Date.now(),
-            lastActivity: Date.now(), // navigation = activity
+            lastActivity,
             scrollY: 0,
             hasFormInput: false
           }
         });
       }
-    } catch (e) { /* Tab may have closed */ }
+    } catch (e) { }
   }
 });
 
-// ─── Bulk Operations ──────────────────────────────────────────────────────────────
-
-async function hibernateAllTabs() {
-  const settings = await getSettings();
-  const tabs = await chrome.tabs.query({});
-  for (const tab of tabs) {
-    if (await canSuspendTab(tab, settings)) {
-      await suspendTab(tab);
-    }
-  }
-}
-
-async function wakeAllTabs() {
-  const ids = await getHibernatedList();
-  for (const tabId of ids) {
-    try {
-      await wakeTab(tabId);
-    } catch (e) {
-      // Tab no longer exists — purge
-      await chrome.storage.local.remove('suspended-' + tabId);
-      await removeFromHibernatedList(tabId);
-    }
-  }
-  updateBadge();
-}
-
-// ─── Hibernated Tabs List ─────────────────────────────────────────────────────────
-
-async function getHibernatedList() {
-  const data = await chrome.storage.local.get('hibernatedTabs');
-  return data.hibernatedTabs || [];
-}
-
-async function addToHibernatedList(tabId) {
-  const list = await getHibernatedList();
-  if (!list.includes(tabId)) {
-    list.push(tabId);
-    await chrome.storage.local.set({ hibernatedTabs: list });
-  }
-}
-
-async function removeFromHibernatedList(tabId) {
-  const list = await getHibernatedList();
-  await chrome.storage.local.set({ hibernatedTabs: list.filter(id => id !== tabId) });
-}
-
-// ─── Tab Data ─────────────────────────────────────────────────────────────────────
-
-async function getTabData(tabId) {
-  const key = 'tabdata-' + tabId;
-  const data = await chrome.storage.local.get(key);
-  return data[key] || null;
-}
-
-// ─── Badge ────────────────────────────────────────────────────────────────────────
-
-async function updateBadge() {
-  const settings = await getSettings();
-  const list = await getHibernatedList();
-  const count = list.length;
-
-  if (!settings.enabled) {
-    chrome.action.setBadgeText({ text: 'OFF' });
-    chrome.action.setBadgeBackgroundColor({ color: '#888888' });
-  } else if (settings.showBadge && count > 0) {
-    chrome.action.setBadgeText({ text: count.toString() });
-    chrome.action.setBadgeBackgroundColor({ color: '#1D9E75' });
-  } else {
-    chrome.action.setBadgeText({ text: '' });
-  }
-}
-
 // ─── Tab Event Listeners ──────────────────────────────────────────────────────────
 
-/**
- * When the user switches to a tab, stamp it as active (reset its idle clock).
- */
 chrome.tabs.onActivated.addListener(async (activeInfo) => {
   const key = 'tabdata-' + activeInfo.tabId;
   const existing = await getTabData(activeInfo.tabId);
   await chrome.storage.local.set({
     [key]: {
       createdAt: existing?.createdAt || Date.now(),
-      lastActivity: Date.now(), // user is looking at this tab
+      lastActivity: Date.now(),
       scrollY: existing?.scrollY || 0,
       hasFormInput: existing?.hasFormInput || false
     }
   });
+
+  try {
+    const settings = await getSettings();
+    if (settings.snapshotsEnabled) {
+      updateTabSnapshot(activeInfo.windowId, activeInfo.tabId);
+    }
+    if (settings.autoWakeOnFocus) {
+      const tab = await chrome.tabs.get(activeInfo.tabId);
+      const suspendedPrefix = chrome.runtime.getURL('suspended.html');
+      if (tab.url && tab.url.startsWith(suspendedPrefix)) {
+        const urlObj = new URL(tab.url);
+        const storedTabId = parseInt(urlObj.searchParams.get('tabId'), 10) || activeInfo.tabId;
+        const fallback = { url: urlObj.searchParams.get('url') || '' };
+        await wakeTab(storedTabId, activeInfo.tabId, fallback);
+      }
+    }
+  } catch (e) {}
 });
 
-/**
- * When a tab is closed, clean up all its stored data.
- */
 chrome.tabs.onRemoved.addListener(async (tabId) => {
-  await chrome.storage.local.remove(['tabdata-' + tabId, 'suspended-' + tabId]);
-  await removeFromHibernatedList(tabId);
+  await chrome.storage.local.remove(['tabdata-' + tabId, 'suspended-' + tabId, 'snapshot-' + tabId]);
+  const list = await getHibernatedList();
+  await chrome.storage.local.set({ hibernatedTabs: list.filter(id => id !== tabId) });
   updateBadge();
 });
 
@@ -417,13 +167,17 @@ chrome.tabs.onRemoved.addListener(async (tabId) => {
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   handleMessage(message, sender).then(sendResponse);
-  return true; // Keep channel open for async response
+  return true;
 });
 
 async function handleMessage(message, sender) {
   switch (message.action) {
-
-    // ── Content script: user activity ──
+    case 'updateBatteryStatus': {
+      if (message.charging !== undefined) {
+        await chrome.storage.local.set({ deviceCharging: message.charging });
+      }
+      return { success: true };
+    }
     case 'reportActivity': {
       if (sender.tab) {
         const key = 'tabdata-' + sender.tab.id;
@@ -431,7 +185,7 @@ async function handleMessage(message, sender) {
         await chrome.storage.local.set({
           [key]: {
             createdAt: existing?.createdAt || Date.now(),
-            lastActivity: Date.now(), // reset the idle clock
+            lastActivity: Date.now(),
             scrollY: existing?.scrollY || 0,
             hasFormInput: existing?.hasFormInput || false
           }
@@ -439,8 +193,6 @@ async function handleMessage(message, sender) {
       }
       return { success: true };
     }
-
-    // ── Content script: tab data update (scroll, form) ──
     case 'updateTabData': {
       if (sender.tab) {
         const key = 'tabdata-' + sender.tab.id;
@@ -456,13 +208,13 @@ async function handleMessage(message, sender) {
       }
       return { success: true };
     }
-
-    // ── Popup: stats ──
     case 'getStats': {
       const tabs = await chrome.tabs.query({});
-      const hibernatedList = await getHibernatedList();
       const settings = await getSettings();
-      const hibernatedCount = hibernatedList.length;
+      // Count tabs actually parked on the suspended page rather than the
+      // persisted list, which can drift (e.g. across restarts).
+      const suspendedPrefix = chrome.runtime.getURL('suspended.html');
+      const hibernatedCount = tabs.filter(t => t.url && t.url.startsWith(suspendedPrefix)).length;
       return {
         totalTabs: tabs.length,
         activeTabs: tabs.length - hibernatedCount,
@@ -471,70 +223,234 @@ async function handleMessage(message, sender) {
         enabled: settings.enabled
       };
     }
-
-    // ── Popup: toggle extension on/off ──
+    case 'getDashboardStats': {
+      const data = await chrome.storage.local.get('analytics');
+      const list = await getHibernatedList();
+      const currentMemory = list.length * MB_PER_TAB;
+      return {
+        analytics: data.analytics || {},
+        currentSessionMemory: currentMemory,
+        mbPerTab: MB_PER_TAB
+      };
+    }
     case 'toggleEnabled': {
       const settings = await getSettings();
       settings.enabled = !settings.enabled;
       await chrome.storage.local.set({ settings });
-
       if (settings.enabled) {
-        // Re-stamp all tabs so timers restart cleanly
         await initAllTabTimestamps();
         ensureHibernationAlarm();
       } else {
-        // Stop the alarm while disabled
         await chrome.alarms.clear(CHECK_ALARM);
       }
-
       updateBadge();
       return { enabled: settings.enabled };
     }
-
-    // ── Popup: bulk actions ──
     case 'hibernateAll': {
       await hibernateAllTabs();
       return { success: true };
     }
-
     case 'wakeAll': {
       await wakeAllTabs();
       return { success: true };
     }
-
-    // ── Suspended page: wake single tab ──
     case 'wakeTab': {
       if (message.tabId) {
-        await wakeTab(message.tabId);
+        const fallback = message.url ? { url: message.url } : null;
+        await wakeTab(message.tabId, sender.tab?.id, fallback);
       }
       return { success: true };
     }
-
-    // ── Options page ──
+    case 'getSuspendedTabs': {
+      const tabs = await chrome.tabs.query({});
+      const results = [];
+      const suspendedPrefix = chrome.runtime.getURL('suspended.html');
+      for (const tab of tabs) {
+        if (sender.tab && tab.id === sender.tab.id) continue;
+        const isSuspended = tab.url && tab.url.startsWith(suspendedPrefix);
+        if (isSuspended) {
+          const key = 'suspended-' + tab.id;
+          const data = await chrome.storage.local.get(key);
+          const info = data[key];
+          if (info) {
+            results.push({
+              tabId: tab.id,
+              title: info.title || 'Untitled Tab',
+              url: info.url || '',
+              favicon: info.favicon || '',
+              isSuspended: true,
+              suspendedAt: info.suspendedAt || Date.now()
+            });
+          } else {
+            try {
+              const urlObj = new URL(tab.url);
+              const params = new URLSearchParams(urlObj.search);
+              results.push({
+                tabId: tab.id,
+                title: params.get('title') || 'Untitled Tab',
+                url: params.get('url') || '',
+                favicon: params.get('favicon') || '',
+                isSuspended: true,
+                suspendedAt: parseInt(params.get('suspendedAt'), 10) || Date.now()
+              });
+            } catch (e) {}
+          }
+        } else {
+          if (tab.url && (tab.url.startsWith('chrome://') || tab.url.startsWith('edge://') ||
+              tab.url.startsWith('chrome-extension://') || tab.url.startsWith('about:'))) {
+            continue;
+          }
+          results.push({
+            tabId: tab.id,
+            title: tab.title || 'Untitled Tab',
+            url: tab.url || '',
+            favicon: tab.favIconUrl || '',
+            isSuspended: false,
+            suspendedAt: null
+          });
+        }
+      }
+      return results;
+    }
+    case 'wakeAndFocusTab': {
+      if (message.tabId) {
+        try {
+          const tab = await chrome.tabs.get(message.tabId);
+          const suspendedPrefix = chrome.runtime.getURL('suspended.html');
+          if (tab.url && tab.url.startsWith(suspendedPrefix)) {
+            await wakeTab(message.tabId);
+          }
+          await chrome.tabs.update(message.tabId, { active: true });
+          await chrome.windows.update(tab.windowId, { focused: true });
+        } catch (e) {}
+      }
+      return { success: true };
+    }
     case 'getSettings': {
       return await getSettings();
     }
-
     case 'saveSettings': {
       const newSettings = message.settings;
-      // Preserve the current enabled state so options page can't accidentally disable
       const current = await getSettings();
       newSettings.enabled = current.enabled;
       await chrome.storage.local.set({ settings: newSettings });
-
-      // Re-stamp all tabs so the new timeout takes effect from now
       await initAllTabTimestamps();
-
-      // Ensure alarm is running (it may have been cleared if previously disabled)
       if (newSettings.enabled) {
         ensureHibernationAlarm();
       }
-
       updateBadge();
       return { success: true };
+    }
+    
+    // ── Deep Sleep Stashing ──
+    case 'stashCurrentTab': {
+      if (sender.tab) {
+        await stashTab(sender.tab);
+      } else {
+        const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        if (activeTab) await stashTab(activeTab);
+      }
+      return { success: true };
+    }
+    case 'stashCurrentGroup': {
+      if (sender.tab && sender.tab.groupId !== chrome.tabGroups.TAB_GROUP_ID_NONE) {
+        await stashCurrentGroup(sender.tab);
+      } else {
+        const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        if (activeTab && activeTab.groupId !== chrome.tabGroups.TAB_GROUP_ID_NONE) {
+          await stashCurrentGroup(activeTab);
+        }
+      }
+      return { success: true };
+    }
+    case 'stashAllSuspended': {
+      const tabs = await chrome.tabs.query({});
+      const suspendedPrefix = chrome.runtime.getURL('suspended.html');
+      
+      const suspendedTabs = tabs.filter(tab => tab.url && tab.url.startsWith(suspendedPrefix));
+      
+      const tabsByGroup = {};
+      const individualTabs = [];
+      
+      for (const tab of suspendedTabs) {
+        if (tab.groupId !== chrome.tabGroups.TAB_GROUP_ID_NONE) {
+          if (!tabsByGroup[tab.groupId]) tabsByGroup[tab.groupId] = [];
+          tabsByGroup[tab.groupId].push(tab);
+        } else {
+          individualTabs.push(tab);
+        }
+      }
+      
+      const groupIds = Object.keys(tabsByGroup);
+      if (groupIds.length > 0) {
+        await Promise.allSettled(groupIds.map(async (groupId) => {
+          const groupTabs = tabsByGroup[groupId];
+          try {
+            const groupInfo = await chrome.tabGroups.get(parseInt(groupId, 10));
+            await stashTabsAsGroup(groupTabs, groupInfo.title, groupInfo.color);
+          } catch (e) {
+            // Fallback: If we can't find the group info, stash them individually
+            for (const t of groupTabs) {
+               individualTabs.push(t);
+            }
+          }
+        }));
+      }
+      
+      for (const tab of individualTabs) {
+        await stashTab(tab);
+      }
+      return { success: true };
+    }
+    case 'getStashedTabs': {
+      return await getStashedTabs();
+    }
+    case 'restoreStashedTab': {
+      if (message.stashId) {
+        await restoreStashedTab(message.stashId);
+      }
+      return { success: true };
+    }
+    case 'getStashedGroups': {
+      return await getStashedGroups();
+    }
+    case 'restoreStashedGroup': {
+      if (message.stashId) {
+        await restoreStashedGroup(message.stashId);
+      }
+      return { success: true };
+    }
+    case 'clearStashedTabs': {
+      await chrome.storage.local.set({ stashedTabs: [], stashedGroups: [] });
+      return { success: true };
+    }
+    
+    // ── Check if active tab is in a group ──
+    case 'checkActiveTabGroup': {
+      const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      return { 
+        inGroup: activeTab && activeTab.groupId !== chrome.tabGroups.TAB_GROUP_ID_NONE 
+      };
     }
 
     default:
       return { error: 'Unknown action: ' + message.action };
   }
 }
+
+// ─── Keyboard Shortcuts HUD Trigger ──────────────────────────────────────────────
+chrome.commands.onCommand.addListener(async (command) => {
+  if (command === 'toggle-quick-hud') {
+    try {
+      const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      if (activeTab && activeTab.id) {
+        const url = activeTab.url || '';
+        if (url.startsWith('chrome://') || url.startsWith('chrome-extension://') ||
+            url.startsWith('edge://') || url.startsWith('about:')) {
+          return;
+        }
+        await chrome.tabs.sendMessage(activeTab.id, { action: 'toggleHUD' });
+      }
+    } catch (e) {}
+  }
+});

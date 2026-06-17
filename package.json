@@ -1,0 +1,24 @@
+{
+  "name": "tab-hibernator",
+  "version": "2.0.1",
+  "description": "<p align=\"center\">   <img src=\"https://raw.githubusercontent.com/sujalmeena7/Tab-Hibernator-Pro/main/icons/icon128.png\" width=\"80\" alt=\"Tab Hibernator Pro Logo\" /> </p>",
+  "main": "background.js",
+  "scripts": {
+    "test": "vitest run",
+    "build": "node build.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sujalmeena7/Tab-Hibernator-Pro.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sujalmeena7/Tab-Hibernator-Pro/issues"
+  },
+  "homepage": "https://github.com/sujalmeena7/Tab-Hibernator-Pro#readme",
+  "devDependencies": {
+    "vitest": "^4.1.7"
+  }
+}

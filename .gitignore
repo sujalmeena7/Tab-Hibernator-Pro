@@ -1,0 +1,4 @@
+node_modules/
+*.zip
+litellm-config.yaml
+.claude/

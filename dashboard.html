@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tab Hibernator Pro — Dashboard</title>
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+  <div class="dashboard-wrapper">
+    <header class="dashboard-header">
+      <div class="header-brand">
+        <img src="icons/icon48.png" alt="Logo" class="brand-logo">
+        <div>
+          <h1>Dashboard</h1>
+          <p class="subtitle">Tab Hibernator Pro</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <a href="https://rzp.io/rzp/ihYPBim" target="_blank" rel="noopener" class="btn btn-secondary btn-support" title="Support the project">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M17 8h1a4 4 0 0 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/><line x1="6" y1="2" x2="6" y2="4"/><line x1="10" y1="2" x2="10" y2="4"/><line x1="14" y1="2" x2="14" y2="4"/></svg>
+          <span>Support</span>
+        </a>
+        <button id="btnRefresh" class="btn btn-secondary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+          Refresh
+        </button>
+      </div>
+    </header>
+
+    <section class="panel overview-panel">
+      <div class="hero-stat">
+        <div class="hero-label">Memory saved overall</div>
+        <h1 id="totalMemorySaved">0.0 GB</h1>
+      </div>
+      <div class="kpi-row">
+        <div class="kpi">
+          <div class="metric-label">Tabs suspended</div>
+          <div class="metric-value" id="totalTabsSuspended">0</div>
+          <div class="metric-sub" id="todaySuspended">+0 today</div>
+        </div>
+        <div class="kpi">
+          <div class="metric-label">Daily average</div>
+          <div class="metric-value" id="dailyAverage">0 MB</div>
+        </div>
+        <div class="kpi">
+          <div class="metric-label">Current session</div>
+          <div class="metric-value" id="currentSession">0 MB</div>
+        </div>
+        <div class="kpi">
+          <div class="metric-label">Peak session</div>
+          <div class="metric-value" id="peakSession">0 MB</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel comparison-panel">
+      <div class="panel-head">
+        <div>
+          <h2>Same tabs, less memory</h2>
+          <p class="panel-desc">How much RAM your suspended tabs are freeing up right now.</p>
+        </div>
+      </div>
+
+      <div class="comparison-cards">
+        <div class="comp-card danger-card">
+          <div class="comp-title"><span class="dot red"></span> Without Tab Hibernator</div>
+          <div class="comp-metric"><span id="withoutMemory">0.0 GB</span></div>
+          <div class="comp-sub">Estimated Chrome memory</div>
+          <div class="progress-bar-container">
+            <div class="progress-bar red" style="width: 72%;"></div>
+          </div>
+          <div class="comp-list" id="withoutTabList"></div>
+          <div class="comp-total">Total: <span id="withoutTotalVal">0 MB</span></div>
+        </div>
+
+        <div class="comp-arrow">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </div>
+
+        <div class="comp-card success-card">
+          <div class="comp-title"><span class="dot green"></span> With Tab Hibernator Pro</div>
+          <div class="comp-metric"><span id="withMemory">0.0 GB</span> <span class="badge">+68%</span></div>
+          <div class="comp-sub">Estimated Chrome memory</div>
+          <div class="progress-bar-container">
+            <div class="progress-bar green" style="width: 32%;"></div>
+          </div>
+          <div class="comp-list" id="withTabList"></div>
+          <div class="comp-total">Total: <span id="withTotalVal">0 MB</span></div>
+        </div>
+      </div>
+
+      <div class="comparison-footer">
+        <span id="footerSavings">0 GB freed</span> · 68% reduction · 0 tabs lost · 100% automatic
+      </div>
+    </section>
+
+    <div class="activity-grid">
+      <section class="panel">
+        <div class="section-title">Last 7 days</div>
+        <div class="bar-chart" id="weeklyChart"></div>
+      </section>
+
+      <section class="panel">
+        <div class="section-title">Top sites hibernated</div>
+        <ul class="top-sites-list" id="topSitesList"></ul>
+      </section>
+    </div>
+
+    <section class="panel">
+      <div class="section-title">Highlights</div>
+      <ul class="highlights-list">
+        <li><span>Longest streak</span><strong id="hlStreak">0 days</strong></li>
+        <li><span>Most tabs at once</span><strong id="hlMostTabs">0</strong></li>
+        <li><span>Avg. time saved</span><strong id="hlTimeSaved">0 min</strong></li>
+      </ul>
+    </section>
+
+    <section class="panel guide-panel">
+      <div class="guide-head">
+        <div>
+          <h2>How stashing works</h2>
+          <p class="panel-desc">Hibernating frees RAM but keeps tabs open. Stashing closes tabs and saves them here for later — clear clutter without losing anything.</p>
+        </div>
+        <span class="guide-pill">In the toolbar popup</span>
+      </div>
+
+      <div class="guide-grid">
+        <div class="guide-card">
+          <div class="guide-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
+          </div>
+          <h3>Stash Tab</h3>
+          <p>Closes the tab you're on and saves it to this board, freeing its memory completely.</p>
+          <div class="guide-tip"><strong>Best for</strong> a single page you'll read later but don't want open.</div>
+        </div>
+
+        <div class="guide-card">
+          <div class="guide-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+          </div>
+          <h3>Stash Group</h3>
+          <p>Saves a whole Chrome tab group — name, color and every tab. Restores exactly as it was.</p>
+          <div class="guide-tip"><strong>Best for</strong> a full project or research session in a tab group.</div>
+          <div class="guide-note">Appears only when your active tab is in a group.</div>
+        </div>
+
+        <div class="guide-card">
+          <div class="guide-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8v13H3V8"></path><polyline points="1 3 23 3 23 8 1 8 1 3"></polyline><line x1="10" y1="12" x2="14" y2="12"></line></svg>
+          </div>
+          <h3>Stash All</h3>
+          <p>Moves every already-hibernated tab here in one click, closing them to reclaim all the RAM.</p>
+          <div class="guide-tip"><strong>Best for</strong> a clean slate at the end of the day.</div>
+        </div>
+      </div>
+
+      <div class="guide-flow">
+        <div class="flow-step"><span class="flow-num">1</span> Click a stash button in the popup</div>
+        <svg class="flow-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        <div class="flow-step"><span class="flow-num">2</span> Tabs close and land on this board</div>
+        <svg class="flow-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        <div class="flow-step"><span class="flow-num">3</span> Hit <strong>Restore</strong> below to reopen</div>
+      </div>
+
+      <div class="guide-compare">
+        <div class="compare-item">
+          <span class="compare-tag hibernate">Hibernate</span>
+          <p>Tab stays open, just frozen, and auto-wakes when clicked. Use it for tabs you'll return to soon.</p>
+        </div>
+        <div class="compare-item">
+          <span class="compare-tag stash">Stash</span>
+          <p>Tab closes and is saved here to reopen manually. Use it to declutter for the long haul.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel stash-panel">
+      <div class="panel-head">
+        <div>
+          <h2>Stash board</h2>
+          <p class="panel-desc">Tabs and groups you've stashed away.</p>
+        </div>
+        <div class="stash-controls">
+          <input type="text" id="stashSearch" placeholder="Search stash…">
+          <button id="clearStashBtn" class="btn btn-secondary">Clear all</button>
+        </div>
+      </div>
+      <div id="stashEmpty" class="stash-empty" style="display: none;">
+        Nothing stashed yet. Use the stash buttons in the popup to save tabs here.
+      </div>
+      <div class="stash-grid" id="stashList"></div>
+    </section>
+
+  </div>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>

@@ -1,17 +1,25 @@
 {
   "manifest_version": 3,
   "name": "Tab Hibernator Pro",
-  "version": "1.0.0",
+  "version": "2.0.1",
   "description": "Automatically suspends inactive tabs to free RAM. Smarter, faster, and privacy-first.",
   "permissions": [
     "tabs",
     "storage",
+    "unlimitedStorage",
     "alarms",
     "scripting",
-    "activeTab"
+    "activeTab",
+    "favicon",
+    "tabGroups",
+    "system.memory"
+  ],
+  "host_permissions": [
+    "<all_urls>"
   ],
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "background.js",
+    "type": "module"
   },
   "action": {
     "default_popup": "popup.html",
@@ -33,5 +41,14 @@
       "js": ["content.js"],
       "run_at": "document_idle"
     }
-  ]
+  ],
+  "commands": {
+    "toggle-quick-hud": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+K",
+        "mac": "MacCtrl+Shift+K"
+      },
+      "description": "Toggle Quick-Wake HUD Search"
+    }
+  }
 }
