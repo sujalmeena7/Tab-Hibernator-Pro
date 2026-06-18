@@ -8,6 +8,10 @@ import {
 
 import { updateTabSnapshot } from './bg/snapshot.js';
 
+import { debouncedSetMany } from './bg/debounced-storage.js';
+
+import { getTabOverride, setTabOverride, clearTabOverride } from './bg/pause.js';
+
 import {
   checkAndHibernateTabs, wakeTab, hibernateAllTabs, wakeAllTabs, pendingScrollRestores, suspendTab
 } from './bg/hibernation.js';
@@ -28,6 +32,171 @@ function ensureHibernationAlarm() {
       });
     }
   });
+}
+
+// ─── Right-Click Context Menu: Pause Hibernation ──────────────────────────────────
+
+const CTX_PREFIX = 'thp-pause-';
+
+function buildContextMenu() {
+  chrome.contextMenus.removeAll(() => {
+    chrome.contextMenus.create({
+      id: CTX_PREFIX + 'parent',
+      title: 'Tab Hibernator',
+      contexts: ['all']
+    });
+    chrome.contextMenus.create({
+      id: CTX_PREFIX + '15m',
+      parentId: CTX_PREFIX + 'parent',
+      title: 'Pause for 15 minutes',
+      contexts: ['all']
+    });
+    chrome.contextMenus.create({
+      id: CTX_PREFIX + '1h',
+      parentId: CTX_PREFIX + 'parent',
+      title: 'Pause for 1 hour',
+      contexts: ['all']
+    });
+    chrome.contextMenus.create({
+      id: CTX_PREFIX + 'session',
+      parentId: CTX_PREFIX + 'parent',
+      title: 'Pause until I close this tab',
+      contexts: ['all']
+    });
+    chrome.contextMenus.create({
+      id: CTX_PREFIX + 'forever',
+      parentId: CTX_PREFIX + 'parent',
+      title: 'Never hibernate this tab',
+      contexts: ['all']
+    });
+    chrome.contextMenus.create({
+      id: CTX_PREFIX + 'resume',
+      parentId: CTX_PREFIX + 'parent',
+      title: 'Resume hibernation',
+      contexts: ['all']
+    });
+  });
+}
+
+function applyPauseFromMenuId(menuItemId, tabId) {
+  if (menuItemId === CTX_PREFIX + 'resume') {
+    return clearTabOverride(tabId);
+  }
+  if (menuItemId === CTX_PREFIX + '15m') {
+    return setTabOverride(tabId, { mode: 'pause', until: Date.now() + 15 * 60 * 1000 });
+  }
+  if (menuItemId === CTX_PREFIX + '1h') {
+    return setTabOverride(tabId, { mode: 'pause', until: Date.now() + 60 * 60 * 1000 });
+  }
+  if (menuItemId === CTX_PREFIX + 'session') {
+    return setTabOverride(tabId, { mode: 'pause', until: Infinity });
+  }
+  if (menuItemId === CTX_PREFIX + 'forever') {
+    return setTabOverride(tabId, { mode: 'never' });
+  }
+  return Promise.resolve();
+}
+
+// Rebuild the menu on install, update, and browser start so it survives
+// service-worker restarts.
+chrome.runtime.onInstalled.addListener(buildContextMenu);
+chrome.runtime.onStartup.addListener(buildContextMenu);
+
+chrome.contextMenus.onClicked.addListener(async (info, tab) => {
+  if (!tab || !tab.id) return;
+  if (!info.menuItemId.startsWith(CTX_PREFIX)) return;
+
+  await applyPauseFromMenuId(info.menuItemId, tab.id);
+
+  // Show a tiny confirmation so the user knows their click did something.
+  const after = await getTabOverride(tab.id);
+  let message = '';
+  if (info.menuItemId === CTX_PREFIX + 'resume') {
+    message = 'Hibernation resumed for this tab';
+  } else if (after?.mode === 'never') {
+    message = 'This tab will never be hibernated';
+  } else if (after?.until === Infinity) {
+    message = 'Paused until you close this tab';
+  } else if (after?.until) {
+    const mins = Math.max(1, Math.round((after.until - Date.now()) / 60000));
+    message = `Paused for ${mins} minute${mins === 1 ? '' : 's'}`;
+  }
+  if (message) {
+    // Mark the tab so the user can see the pause is active (tab-level badge).
+    try {
+      await chrome.action.setBadgeText({ tabId: tab.id, text: '⏸' });
+      await chrome.action.setBadgeBackgroundColor({ tabId: tab.id, color: '#d97706' });
+    } catch (_) { /* tab-level badge may not be supported everywhere */ }
+
+    // Inject a small in-page toast so the user sees the result immediately.
+    // We skip chrome:// pages and the extension's own pages where injection fails.
+    if (tab.url && !tab.url.startsWith('chrome://') &&
+        !tab.url.startsWith('chrome-extension://') &&
+        !tab.url.startsWith('about:') && tab.id) {
+      try {
+        await chrome.scripting.executeScript({
+          target: { tabId: tab.id },
+          func: showPauseToast,
+          args: [message]
+        });
+      } catch (_) { /* page may not allow injection (e.g. chrome web store) */ }
+    }
+  }
+});
+
+/**
+ * Injected into the page to render a small ephemeral toast confirming the pause.
+ * Runs in the page's isolated world; uses Shadow DOM so it can't be styled by
+ * the host page. Self-destructs after a few seconds.
+ */
+function showPauseToast(message) {
+  const host = document.createElement('div');
+  host.id = 'tab-hibernator-toast-host';
+  host.style.cssText = 'position:fixed;bottom:24px;right:24px;z-index:2147483647;pointer-events:none;';
+  document.documentElement.appendChild(host);
+
+  const shadow = host.attachShadow({ mode: 'open' });
+  shadow.innerHTML = `
+    <style>
+      .toast {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 14px;
+        background: rgba(17, 17, 24, 0.92);
+        color: #f4f5f9;
+        font: 600 13px/1.4 -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        letter-spacing: -0.01em;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 10px;
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+        backdrop-filter: blur(12px) saturate(180%);
+        -webkit-backdrop-filter: blur(12px) saturate(180%);
+        opacity: 0;
+        transform: translateY(8px) scale(0.96);
+        animation: thp-in 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards,
+                   thp-out 0.25s cubic-bezier(0.4, 0, 0.2, 1) 2.4s forwards;
+      }
+      .dot {
+        width: 8px; height: 8px;
+        border-radius: 50%;
+        background: #d97706;
+        box-shadow: 0 0 10px #d97706;
+        flex-shrink: 0;
+      }
+      @keyframes thp-in {
+        to { opacity: 1; transform: translateY(0) scale(1); }
+      }
+      @keyframes thp-out {
+        to { opacity: 0; transform: translateY(4px) scale(0.98); }
+      }
+    </style>
+    <div class="toast"><span class="dot"></span><span></span></div>
+  `;
+  shadow.querySelector('.toast span:last-child').textContent = message;
+
+  // Clean up after the animation finishes.
+  setTimeout(() => host.remove(), 2800);
 }
 
 // ─── Initialization ───────────────────────────────────────────────────────────────
@@ -111,7 +280,7 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
         const lastActivity = t.active
           ? Date.now()
           : (existing?.lastActivity || existing?.createdAt || Date.now());
-        await chrome.storage.local.set({
+        debouncedSetMany({
           [key]: {
             createdAt: existing?.createdAt || Date.now(),
             lastActivity,
@@ -129,7 +298,7 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
 chrome.tabs.onActivated.addListener(async (activeInfo) => {
   const key = 'tabdata-' + activeInfo.tabId;
   const existing = await getTabData(activeInfo.tabId);
-  await chrome.storage.local.set({
+  debouncedSetMany({
     [key]: {
       createdAt: existing?.createdAt || Date.now(),
       lastActivity: Date.now(),
@@ -160,6 +329,9 @@ chrome.tabs.onRemoved.addListener(async (tabId) => {
   await chrome.storage.local.remove(['tabdata-' + tabId, 'suspended-' + tabId, 'snapshot-' + tabId]);
   const list = await getHibernatedList();
   await chrome.storage.local.set({ hibernatedTabs: list.filter(id => id !== tabId) });
+  // Clear per-tab pause override + tab-level pause badge.
+  await clearTabOverride(tabId);
+  try { await chrome.action.setBadgeText({ tabId, text: '' }); } catch (_) {}
   updateBadge();
 });
 
@@ -182,7 +354,7 @@ async function handleMessage(message, sender) {
       if (sender.tab) {
         const key = 'tabdata-' + sender.tab.id;
         const existing = await getTabData(sender.tab.id);
-        await chrome.storage.local.set({
+        debouncedSetMany({
           [key]: {
             createdAt: existing?.createdAt || Date.now(),
             lastActivity: Date.now(),
@@ -197,7 +369,7 @@ async function handleMessage(message, sender) {
       if (sender.tab) {
         const key = 'tabdata-' + sender.tab.id;
         const existing = await getTabData(sender.tab.id);
-        await chrome.storage.local.set({
+        debouncedSetMany({
           [key]: {
             createdAt: existing?.createdAt || Date.now(),
             lastActivity: existing?.lastActivity || Date.now(),
