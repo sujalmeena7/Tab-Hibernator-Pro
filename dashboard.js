@@ -2,9 +2,46 @@
  * dashboard.js — Tab Hibernator Pro Analytics Dashboard Logic
  */
 
+// Apply the theme synchronously before DOMContentLoaded so the page never
+// flashes the wrong colors. Stored choice wins; otherwise dark mode is
+// the default for the dashboard.
+(function applyThemeEarly() {
+  try {
+    const stored = localStorage.getItem('thp-theme');
+    if (stored === 'dark' || stored === 'light') {
+      document.documentElement.setAttribute('data-theme', stored);
+    } else {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    }
+  } catch (_) { /* localStorage may be blocked; default to dark */ }
+})();
+
 document.addEventListener('DOMContentLoaded', () => {
   const btnRefresh = document.getElementById('btnRefresh');
   btnRefresh.addEventListener('click', loadDashboardData);
+
+  // Theme toggle
+  const themeBtn = document.getElementById('themeToggle');
+  if (themeBtn) {
+    // Keep the ARIA switch state in sync with the current theme.
+    const syncAria = () => {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      themeBtn.setAttribute('aria-checked', isDark ? 'true' : 'false');
+    };
+    syncAria();
+
+    themeBtn.addEventListener('click', () => {
+      const current = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      try { localStorage.setItem('thp-theme', next); } catch (_) {}
+      syncAria();
+    });
+  }
+
+  // Note: system theme changes are intentionally not tracked — the dashboard
+  // defaults to dark and the user's manual choice is the only signal that
+  // matters. (Re-enable the matchMedia listener if you want OS sync back.)
 
   const clearStashBtn = document.getElementById('clearStashBtn');
   if (clearStashBtn) {

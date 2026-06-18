@@ -58,11 +58,20 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 16px;
 }
 .header-brand { display: flex; align-items: center; gap: 14px; }
 .brand-logo { width: 40px; height: 40px; border-radius: 10px; }
 .dashboard-header h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; color: var(--text); }
 .subtitle { font-size: 13px; color: var(--muted); font-weight: 500; }
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+  margin-right: 4px;  /* breathing room between actions and theme toggle */
+}
 
 .btn {
   display: inline-flex;
@@ -621,3 +630,135 @@ ul { list-style: none; }
   .comparison-cards { flex-direction: column; }
   .comp-arrow { transform: rotate(90deg); align-self: center; }
 }
+
+/* ── Dark theme ────────────────────────────────────────────────────── */
+:root[data-theme="dark"] {
+  --bg: #0d1014;
+  --surface: #161a21;
+  --surface-2: #1c2129;
+  --border: rgba(255, 255, 255, 0.06);
+  --border-strong: rgba(255, 255, 255, 0.12);
+
+  --text: #e6e8ee;
+  --text-2: #b8bcc6;
+  --muted: #80848f;
+  --faint: #555963;
+
+  --accent: #a78bfa;
+  --accent-soft: rgba(167, 139, 250, 0.14);
+  --accent-border: rgba(167, 139, 250, 0.32);
+
+  --green: #34d399;
+  --green-soft: rgba(52, 211, 153, 0.10);
+  --red: #f87171;
+  --red-soft: rgba(248, 113, 113, 0.10);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+:root[data-theme="dark"] body {
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(1100px 600px at 100% -5%, rgba(52, 211, 153, 0.10), transparent 60%),
+    radial-gradient(900px 500px at 0% 105%, rgba(167, 139, 250, 0.08), transparent 55%);
+}
+
+/* Override the two hardcoded border colors from the comparison cards */
+:root[data-theme="dark"] .danger-card { border-color: rgba(248, 113, 113, 0.25); }
+:root[data-theme="dark"] .success-card { border-color: rgba(52, 211, 153, 0.25); }
+
+/* The progress-bar track was hardcoded with rgba black — make it more
+   visible in dark mode by switching to a translucent white */
+:root[data-theme="dark"] .progress-bar-container {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+:root[data-theme="dark"] .item-badge {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--muted);
+}
+:root[data-theme="dark"] .item-badge.audio {
+  background: rgba(96, 165, 250, 0.14);
+  color: #60a5fa;
+}
+
+/* Bar chart on dark mode — slight glow so it doesn't disappear into bg */
+:root[data-theme="dark"] .bar {
+  box-shadow: 0 0 0 1px rgba(167, 139, 250, 0.2);
+}
+
+/* Smooth theme transition */
+body, .panel, .btn, input, .compare-tag, .guide-card, .stat-card,
+.dashboard-header, .item-badge, .progress-bar-container, .bar, textarea {
+  transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+}
+
+/* ── Theme toggle (premium minimal icon button) ─────────────────────── */
+.theme-toggle {
+  /* Reset native button */
+  -webkit-appearance: none;
+  appearance: none;
+  font: inherit;
+  color: inherit;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  cursor: pointer;
+  /* Layout — 40×40 square, slightly rounded */
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+  /* Smooth theme-driven color shift */
+  transition: background 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+              color 0.3s ease,
+              transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  color: var(--text-2);
+}
+
+.theme-toggle:hover {
+  border-color: var(--muted);
+  color: var(--text);
+  background: var(--surface-2);
+}
+
+.theme-toggle:active {
+  transform: scale(0.94);
+}
+
+.theme-toggle:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+/* In dark mode the button gets a soft warm tint to match the sun/moon theme */
+:root[data-theme="dark"] .theme-toggle {
+  color: #fde68a;
+  background: rgba(253, 224, 71, 0.04);
+  border-color: rgba(253, 224, 71, 0.18);
+}
+:root[data-theme="dark"] .theme-toggle:hover {
+  background: rgba(253, 224, 71, 0.10);
+  border-color: rgba(253, 224, 71, 0.35);
+  color: #fef3c7;
+}
+
+.theme-icon-sun,
+.theme-icon-moon {
+  position: absolute;
+  width: 17px;
+  height: 17px;
+  transition: opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.theme-icon-sun  { opacity: 1;  transform: scale(1) rotate(0); }
+.theme-icon-moon { opacity: 0;  transform: scale(0.5) rotate(-90deg); }
+
+:root[data-theme="dark"] .theme-icon-sun  { opacity: 0;  transform: scale(0.5) rotate(90deg); }
+:root[data-theme="dark"] .theme-icon-moon { opacity: 1;  transform: scale(1) rotate(0); }
