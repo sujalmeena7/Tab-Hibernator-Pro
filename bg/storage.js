@@ -37,11 +37,28 @@ export async function updateBadge() {
   if (!settings.enabled) {
     chrome.action.setBadgeText({ text: 'OFF' });
     chrome.action.setBadgeBackgroundColor({ color: '#888888' });
+    chrome.action.setTitle({ title: 'Tab Hibernator · paused' });
   } else if (settings.showBadge && count > 0) {
     chrome.action.setBadgeText({ text: count.toString() });
     chrome.action.setBadgeBackgroundColor({ color: '#1D9E75' });
+    // Build a hover preview of the top 3 suspended tabs (favicon + title).
+    const titles = [];
+    for (const id of list.slice(0, 3)) {
+      const data = await chrome.storage.local.get('suspended-' + id);
+      const t = data['suspended-' + id];
+      if (t?.title) {
+        const trimmed = t.title.length > 36 ? t.title.slice(0, 34) + '…' : t.title;
+        titles.push('• ' + trimmed);
+      }
+    }
+    const totalMb = count * 80;
+    const memoryLine = `~${totalMb >= 1024 ? (totalMb / 1024).toFixed(1) + ' GB' : totalMb + ' MB'} freed`;
+    const header = `Tab Hibernator · ${count} sleeping (${memoryLine})`;
+    const body = titles.length ? '\n' + titles.join('\n') + (count > 3 ? `\n…and ${count - 3} more` : '') : '';
+    chrome.action.setTitle({ title: header + body });
   } else {
     chrome.action.setBadgeText({ text: '' });
+    chrome.action.setTitle({ title: 'Tab Hibernator Pro' });
   }
 }
 

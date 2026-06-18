@@ -14,7 +14,6 @@
   const showBadge        = $('showBadge');
   const restoreOnRestart = $('restoreOnRestart');
   const autoWakeOnFocus  = $('autoWakeOnFocus');
-  const smartMemory      = $('smartMemoryEnabled');
   const snapshots        = $('snapshotsEnabled');
   const whitelist        = $('whitelist');
   const saveBtn          = $('saveBtn');
@@ -23,6 +22,9 @@
   const saveBar          = $('saveBar');
   const domainCount      = $('domainCount');
   const resetBtn         = $('resetBtn');
+  const tierGroup        = $('tierGroup');
+  const domainRules      = $('domainRules');
+  const addDomainTimeout = $('addDomainTimeout');
 
   // ── Helpers ─────────────────────────────────────────
   function formatTime(mins) {
@@ -60,6 +62,114 @@
     });
   }
 
+  // ── Memory tier (replaces the old smartMemoryEnabled boolean) ──────
+  let currentTier = 'balanced';
+  function setTier(tier) {
+    currentTier = tier;
+    document.querySelectorAll('.tier').forEach(b => {
+      const on = b.dataset.tier === tier;
+      b.classList.toggle('active', on);
+      b.setAttribute('aria-checked', on ? 'true' : 'false');
+    });
+  }
+  if (tierGroup) {
+    tierGroup.addEventListener('click', (e) => {
+      const btn = e.target.closest('.tier');
+      if (!btn) return;
+      setTier(btn.dataset.tier);
+      markDirty();
+    });
+  }
+
+  // ── Per-domain timeout rules ─────────────────────────────────────
+  function renderDomainRules(rules) {
+    if (!domainRules) return;
+    domainRules.innerHTML = '';
+    const entries = Object.entries(rules || {});
+    if (entries.length === 0) {
+      const empty = document.createElement('div');
+      empty.className = 'domain-rules-empty';
+      empty.textContent = 'No rules — every domain uses the global timeout.';
+      domainRules.appendChild(empty);
+      return;
+    }
+    for (const [domain, minutes] of entries) {
+      domainRules.appendChild(buildDomainRuleRow(domain, minutes));
+    }
+  }
+
+  function buildDomainRuleRow(domain, minutes) {
+    const row = document.createElement('div');
+    row.className = 'domain-rule';
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.value = domain;
+    input.placeholder = 'example.com';
+    input.spellcheck = false;
+    input.addEventListener('input', () => { collectDomainRules(); markDirty(); });
+
+    const select = document.createElement('select');
+    const opts = [
+      { v: '0',     label: 'Never hibernate' },
+      { v: '15',    label: '15 minutes' },
+      { v: '30',    label: '30 minutes' },
+      { v: '60',    label: '1 hour' },
+      { v: '120',   label: '2 hours' },
+      { v: '240',   label: '4 hours' }
+    ];
+    for (const o of opts) {
+      const opt = document.createElement('option');
+      opt.value = o.v;
+      opt.textContent = o.label;
+      if (String(Number(minutes) || 0) === o.v) opt.selected = true;
+      select.appendChild(opt);
+    }
+    select.addEventListener('change', () => { collectDomainRules(); markDirty(); });
+
+    const remove = document.createElement('button');
+    remove.type = 'button';
+    remove.className = 'remove-rule';
+    remove.title = 'Remove rule';
+    remove.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>';
+    remove.addEventListener('click', () => {
+      row.remove();
+      if (domainRules.children.length === 0) {
+        const empty = document.createElement('div');
+        empty.className = 'domain-rules-empty';
+        empty.textContent = 'No rules — every domain uses the global timeout.';
+        domainRules.appendChild(empty);
+      }
+      markDirty();
+    });
+
+    row.append(input, select, remove);
+    return row;
+  }
+
+  function collectDomainRules() {
+    const map = {};
+    if (!domainRules) return map;
+    for (const row of domainRules.querySelectorAll('.domain-rule')) {
+      const domain = (row.querySelector('input').value || '').trim().toLowerCase().replace(/^www\./, '');
+      const minutes = parseInt(row.querySelector('select').value, 10) || 0;
+      if (!domain) continue;
+      map[domain] = minutes;
+    }
+    return map;
+  }
+
+  if (addDomainTimeout) {
+    addDomainTimeout.addEventListener('click', () => {
+      // Remove the empty state if present.
+      const empty = domainRules.querySelector('.domain-rules-empty');
+      if (empty) empty.remove();
+      const newRow = buildDomainRuleRow('', 60);
+      domainRules.appendChild(newRow);
+      newRow.querySelector('input').focus();
+    });
+  }
+
   // ── Settings state ──────────────────────────────────
   function currentSettings() {
     const domains = whitelist.value.split('\n').map(d => d.trim().toLowerCase()).filter(Boolean);
@@ -68,9 +178,10 @@
       batterySaverOnly: batterySaver.checked,
       showBadge: showBadge.checked,
       whitelist: domains,
+      domainTimeouts: collectDomainRules(),
       restoreOnRestart: restoreOnRestart.checked,
       autoWakeOnFocus: autoWakeOnFocus.checked,
-      smartMemoryEnabled: smartMemory.checked,
+      smartMemoryEnabled: currentTier,
       snapshotsEnabled: snapshots.checked
     };
   }
@@ -112,7 +223,7 @@
   // ── Wire up ─────────────────────────────────────────
   timeoutSlider.addEventListener('input', () => { updateSliderReadout(); markDirty(); });
 
-  [batterySaver, showBadge, restoreOnRestart, autoWakeOnFocus, smartMemory, snapshots].forEach(el => {
+  [batterySaver, showBadge, restoreOnRestart, autoWakeOnFocus, snapshots].forEach(el => {
     el.addEventListener('change', markDirty);
   });
 
@@ -143,9 +254,10 @@
       batterySaverOnly: false,
       showBadge: true,
       whitelist: [],
+      domainTimeouts: {},
       restoreOnRestart: false,
       autoWakeOnFocus: false,
-      smartMemoryEnabled: true,
+      smartMemoryEnabled: 'balanced',
       snapshotsEnabled: false
     };
     const current = await sendMessage({ action: 'getSettings' });
@@ -227,9 +339,17 @@
     showBadge.checked       = s.showBadge !== false;
     restoreOnRestart.checked= s.restoreOnRestart || false;
     autoWakeOnFocus.checked = s.autoWakeOnFocus || false;
-    smartMemory.checked     = s.smartMemoryEnabled !== false;
+    // Back-compat: legacy boolean (true -> 'balanced', false -> 'off').
+    const tier = (() => {
+      const v = s.smartMemoryEnabled;
+      if (v === 'conservative' || v === 'balanced' || v === 'aggressive' || v === 'off') return v;
+      if (v === false) return 'off';
+      return 'balanced';
+    })();
+    setTier(tier);
     snapshots.checked       = s.snapshotsEnabled === true;
     whitelist.value         = (s.whitelist || []).join('\n');
+    renderDomainRules(s.domainTimeouts || {});
 
     updateSliderReadout();
     updateDomainCount();

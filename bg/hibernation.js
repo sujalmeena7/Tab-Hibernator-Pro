@@ -1,11 +1,44 @@
 import { getTabData, addToHibernatedList, updateAnalyticsOnSuspend, getSettings, removeFromHibernatedList, getHibernatedList, updateBadge } from './storage.js';
+import { isTabPaused } from './pause.js';
 
 export const pendingScrollRestores = {};
+
+/**
+ * Resolve the effective inactivity timeout (in minutes) for a given tab URL.
+ * Per-domain overrides win over the global inactivityMinutes. A value of 0
+ * means "never hibernate" and signals to canSuspendTab() to skip the tab.
+ *
+ * @param {string} url
+ * @param {object} settings
+ * @returns {number} timeout in minutes (0 = never)
+ */
+export function getEffectiveTimeout(url, settings) {
+  if (!url) return settings.inactivityMinutes || 30;
+  try {
+    const domain = new URL(url).hostname.replace(/^www\./, '');
+    const overrides = settings.domainTimeouts || {};
+    for (const [entry, mins] of Object.entries(overrides)) {
+      const norm = (entry || '').trim().toLowerCase().replace(/^www\./, '');
+      if (!norm) continue;
+      if (domain === norm || domain.endsWith('.' + norm)) {
+        return Number(mins) || 0;
+      }
+    }
+  } catch (_) { /* invalid URL */ }
+  return settings.inactivityMinutes || 30;
+}
 
 export async function checkAndHibernateTabs(settings) {
   const tabs = await chrome.tabs.query({});
   const nowMs = Date.now();
-  let thresholdMs = (settings.inactivityMinutes || 30) * 60 * 1000;
+  // Read the smartMemoryEnabled value as a tier; back-compat with the legacy
+  // boolean form (true -> 'balanced', false -> 'off').
+  const memoryTier = (() => {
+    const v = settings.smartMemoryEnabled;
+    if (v === 'conservative' || v === 'balanced' || v === 'aggressive') return v;
+    if (v === false) return 'off';
+    return 'balanced';
+  })();
 
   // Filter eligible tabs first to short-circuit system calls if session is quiet
   const eligibleTabs = [];
@@ -17,31 +50,41 @@ export async function checkAndHibernateTabs(settings) {
 
   if (eligibleTabs.length === 0) return;
 
-  if (settings.smartMemoryEnabled && chrome.system && chrome.system.memory) {
+  // ── Memory pressure adjustment (tier-based) ─────────────────────────────────
+  // 'aggressive'   → also activates on heavy tab counts even with free RAM.
+  // 'balanced'     → activates on actual system memory pressure only.
+  // 'conservative' → activates only in critical pressure (low ratio or low absolute free).
+  // 'off'          → never adjusts thresholds.
+  const tabCount = tabs.length;
+  let pressureMultiplier = 1.0;  // 1.0 = no change; <1 = hibernate sooner.
+  if (memoryTier !== 'off' && chrome.system && chrome.system.memory) {
     try {
       const memInfo = await chrome.system.memory.getInfo();
       if (memInfo && memInfo.capacity > 0) {
         const ratio = memInfo.availableCapacity / memInfo.capacity;
         const availableGB = memInfo.availableCapacity / (1024 * 1024 * 1024);
-        
+
         if (ratio < 0.15 || availableGB < 1.0) {
-          // Critical: low ratio OR low absolute free RAM -> 5x faster hibernation
-          thresholdMs = thresholdMs * 0.2;
+          pressureMultiplier = 0.2;   // critical: 5x faster
         } else if (ratio < 0.25 || availableGB < 2.0) {
-          // Tight: low ratio OR low absolute free RAM -> 2x faster hibernation
-          thresholdMs = thresholdMs * 0.5;
+          pressureMultiplier = (memoryTier === 'conservative') ? 0.7 : 0.5;
+        } else if (memoryTier === 'aggressive' && tabCount >= 20) {
+          // 'aggressive' trims thresholds when the user has a lot of tabs even with free RAM
+          pressureMultiplier = 0.6;
         }
       }
-    } catch (e) {
-      // Fallback to strict time if API fails
-    }
+    } catch (e) { /* fallback to strict time if API fails */ }
   }
 
   for (const tab of eligibleTabs) {
-
     const tabData = await getTabData(tab.id);
     const lastActivity = tabData?.lastActivity || tabData?.createdAt || nowMs;
     const idleMs = nowMs - lastActivity;
+
+    // Per-domain override (0 = never hibernate). Falls back to global default.
+    const baseMinutes = getEffectiveTimeout(tab.url, settings);
+    if (baseMinutes === 0) continue;
+    const thresholdMs = baseMinutes * 60 * 1000 * pressureMultiplier;
 
     if (idleMs >= thresholdMs) {
       await suspendTab(tab);
@@ -51,6 +94,9 @@ export async function checkAndHibernateTabs(settings) {
 
 export async function canSuspendTab(tab, settings, isManual = false) {
   if (!settings.enabled && !isManual) return false;
+
+  // Per-tab pause (right-click "Pause hibernation" override).
+  if (!isManual && await isTabPaused(tab.id)) return false;
 
   if (!isManual && settings.batterySaverOnly) {
     const batData = await chrome.storage.local.get('deviceCharging');
@@ -86,8 +132,21 @@ export async function canSuspendTab(tab, settings, isManual = false) {
       return domain === entry || domain.endsWith('.' + entry);
     });
     if (isWhitelisted) return false;
+
+    // Per-domain "never hibernate" override (timeout = 0). Distinct from the
+    // whitelist so users can configure: whitelist = never hibernate OR
+    // override timeout, but not both for the same domain.
+    const overrides = settings.domainTimeouts || {};
+    for (const [entry, mins] of Object.entries(overrides)) {
+      const norm = (entry || '').trim().toLowerCase().replace(/^www\./, '');
+      if (!norm) continue;
+      if (domain === norm || domain.endsWith('.' + norm)) {
+        if (Number(mins) === 0) return false;
+        break;
+      }
+    }
   } catch (e) {
-    return false; 
+    return false;
   }
 
   const tabData = await getTabData(tab.id);

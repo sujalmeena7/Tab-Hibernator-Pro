@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tab Hibernator Pro — Settings</title>
+  <title>Tab Hibernator Pro · Settings</title>
   <link rel="stylesheet" href="options.css">
 </head>
 <body>
@@ -76,15 +76,29 @@
               </label>
             </div>
 
-            <div class="row">
+            <div class="row column-row">
               <div class="row-body">
-                <div class="row-label">Smart Memory Pressure</div>
-                <div class="row-hint">Intelligently hibernate tabs faster when system RAM is running low</div>
+                <div class="row-label">Memory pressure tier</div>
+                <div class="row-hint">How aggressively to hibernate when system RAM is tight.</div>
+                <div class="tier-group" id="tierGroup" role="radiogroup" aria-label="Memory pressure tier">
+                  <button type="button" class="tier" data-tier="off" role="radio" aria-checked="false">
+                    <span class="tier-name">Off</span>
+                    <span class="tier-desc">Strict timer only</span>
+                  </button>
+                  <button type="button" class="tier" data-tier="conservative" role="radio" aria-checked="false">
+                    <span class="tier-name">Conservative</span>
+                    <span class="tier-desc">Only at critical RAM</span>
+                  </button>
+                  <button type="button" class="tier active" data-tier="balanced" role="radio" aria-checked="true">
+                    <span class="tier-name">Balanced</span>
+                    <span class="tier-desc">Recommended · reacts to pressure</span>
+                  </button>
+                  <button type="button" class="tier" data-tier="aggressive" role="radio" aria-checked="false">
+                    <span class="tier-name">Aggressive</span>
+                    <span class="tier-desc">Trim thresholds on 20+ tabs</span>
+                  </button>
+                </div>
               </div>
-              <label class="switch">
-                <input type="checkbox" id="smartMemoryEnabled" checked>
-                <span class="switch-track"><span class="switch-thumb"></span></span>
-              </label>
             </div>
           </div>
         </div>
@@ -157,7 +171,7 @@
             <div class="row">
               <div class="row-body">
                 <div class="row-label">Capture tab previews</div>
-                <div class="row-hint">Screenshots stay on this device. Off by default — previews may capture sensitive content.</div>
+                <div class="row-hint">Screenshots stay on this device. Off by default, since previews may capture sensitive content.</div>
               </div>
               <label class="switch">
                 <input type="checkbox" id="snapshotsEnabled">
@@ -192,6 +206,19 @@
           <textarea id="whitelist" rows="9" spellcheck="false" placeholder="example.com&#10;mail.google.com&#10;github.com"></textarea>
           <div class="field-hint">One domain per line · subdomains are matched automatically</div>
         </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>Per-domain timeouts</h2>
+              <p class="panel-desc">Override the inactivity timeout for specific sites. Use <code>0</code> to never hibernate a domain.</p>
+            </div>
+            <button type="button" class="btn-secondary" id="addDomainTimeout">+ Add rule</button>
+          </div>
+
+          <div class="domain-rules" id="domainRules"></div>
+          <div class="field-hint">Subdomains match the parent rule (e.g. <code>docs.google.com</code> matches <code>google.com</code>).</div>
+        </div>
       </section>
 
       <!-- About -->
@@ -201,10 +228,10 @@
             <img src="icons/icon48.png" class="about-mark" alt="">
             <div>
               <h2>Tab Hibernator <span class="about-pro">Pro</span></h2>
-              <p class="about-version">Version 2.0.1</p>
+              <p class="about-version">Version 2.0.2</p>
             </div>
           </div>
-          <p class="about-blurb">A lightweight, privacy-first tab manager that puts inactive tabs to sleep — so your browser stays fast and your memory stays free. All settings and previews stay on your device.</p>
+          <p class="about-blurb">A lightweight, privacy-first tab manager that puts inactive tabs to sleep so your browser stays fast and your memory stays free. All settings and previews stay on your device.</p>
         </div>
 
         <div class="panel support-panel">
@@ -238,7 +265,7 @@
             </div>
             <div>
               <h3>Request a feature</h3>
-              <p class="feature-desc">Got an idea that would make Tab Hibernator even better? Send it my way — I read every submission.</p>
+              <p class="feature-desc">Got an idea that would make Tab Hibernator even better? Send it my way. I read every submission.</p>
             </div>
           </div>
 

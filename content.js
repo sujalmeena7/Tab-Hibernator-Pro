@@ -14,9 +14,29 @@
 
   const ACTIVITY_EVENTS = ['mousedown', 'keydown', 'scroll', 'touchstart'];
 
+  /**
+   * True when the extension's runtime is still reachable from this content
+   * script. Returns false after the extension is reloaded/updated, which
+   * prevents the noisy "Extension context invalidated" errors that appear
+   * in chrome://extensions on long-lived pages (Netflix, YouTube, etc).
+   */
+  function runtimeAvailable() {
+    try {
+      // Accessing chrome.runtime.id throws when the context is invalidated.
+      return !!chrome.runtime?.id;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  function safeSend(msg) {
+    if (!runtimeAvailable()) return Promise.resolve();
+    return chrome.runtime.sendMessage(msg).catch(() => {});
+  }
+
   function onActivity() {
-    if (!reportTimeout) {
-      chrome.runtime.sendMessage({ action: 'reportActivity' }).catch(() => {});
+    if (!reportTimeout && runtimeAvailable()) {
+      safeSend({ action: 'reportActivity' });
       reportTimeout = setTimeout(() => { reportTimeout = null; }, 30000);
     }
   }
@@ -29,11 +49,11 @@
   if (navigator.getBattery) {
     navigator.getBattery().then(battery => {
       function reportBatteryStatus() {
-        chrome.runtime.sendMessage({
+        safeSend({
           action: 'updateBatteryStatus',
           charging: battery.charging,
           level: battery.level
-        }).catch(() => {});
+        });
       }
       reportBatteryStatus();
       battery.addEventListener('chargingchange', reportBatteryStatus);
@@ -134,11 +154,11 @@
   function sendUpdate() {
     if (sendDebounce) clearTimeout(sendDebounce);
     sendDebounce = setTimeout(() => {
-      chrome.runtime.sendMessage({
+      safeSend({
         action: 'updateTabData',
         scrollY: lastScrollY,
         hasFormInput: hasFormInput
-      }).catch(() => {});
+      });
     }, 1000);
   }
 
@@ -168,7 +188,9 @@
 
     // Fetch suspended tabs
     try {
-      hudTabs = await chrome.runtime.sendMessage({ action: 'getSuspendedTabs' }) || [];
+      hudTabs = runtimeAvailable()
+        ? await chrome.runtime.sendMessage({ action: 'getSuspendedTabs' }) || []
+        : [];
     } catch (e) {
       hudTabs = [];
     }
@@ -554,7 +576,9 @@
 
   async function wakeSelectedTab(tabId) {
     closeHUD();
-    chrome.runtime.sendMessage({ action: 'wakeAndFocusTab', tabId: tabId }).catch(() => {});
+    if (runtimeAvailable()) {
+      chrome.runtime.sendMessage({ action: 'wakeAndFocusTab', tabId: tabId }).catch(() => {});
+    }
   }
 
   function closeHUD() {
