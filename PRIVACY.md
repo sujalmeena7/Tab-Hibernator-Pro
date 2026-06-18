@@ -1,9 +1,9 @@
-# Tab Hibernator Pro — Privacy Policy
+# Tab Hibernator Pro · Privacy Policy
 
 Tab Hibernator Pro does not collect, transmit, store, or sell any user data.
 
 - All settings are stored locally using chrome.storage.local
-- Tab URLs are only accessed to perform hibernation — never logged or sent anywhere
+- Tab URLs are only accessed to perform hibernation, and are never logged or sent anywhere
 - No analytics, no telemetry, no external servers, no third-party services
 - No data ever leaves your browser
 

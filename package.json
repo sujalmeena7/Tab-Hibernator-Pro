@@ -1,7 +1,7 @@
 {
   "name": "tab-hibernator",
-  "version": "2.0.1",
-  "description": "<p align=\"center\">   <img src=\"https://raw.githubusercontent.com/sujalmeena7/Tab-Hibernator-Pro/main/icons/icon128.png\" width=\"80\" alt=\"Tab Hibernator Pro Logo\" /> </p>",
+  "version": "2.0.2",
+  "description": "Tab Hibernator Pro: privacy-first tab manager that suspends inactive tabs to free RAM.",
   "main": "background.js",
   "scripts": {
     "test": "vitest run",
@@ -20,5 +20,8 @@
   "homepage": "https://github.com/sujalmeena7/Tab-Hibernator-Pro#readme",
   "devDependencies": {
     "vitest": "^4.1.7"
+  },
+  "dependencies": {
+    "sharp": "^0.35.1"
   }
 }

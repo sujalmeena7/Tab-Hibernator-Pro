@@ -63,6 +63,7 @@ const extraFiles = [
   'options.css',
   'suspended.html',
   'suspended.js',
+  'suspended.css',
   'dashboard.html',
   'dashboard.css',
   'dashboard.js',
@@ -74,6 +75,8 @@ const extraFiles = [
   'bg/snapshot.js',
   'bg/stash.js',
   'bg/storage.js',
+  'bg/pause.js',
+  'bg/debounced-storage.js',
 ];
 
 for (const f of extraFiles) {
@@ -91,7 +94,7 @@ for (const file of requiredFiles) {
 }
 
 if (missing.length > 0) {
-  console.error('\n\u274C BUILD FAILED \u2014 Missing files referenced in manifest.json:\n');
+  console.error('\n\u274C BUILD FAILED \u00B7 Missing files referenced in manifest.json:\n');
   missing.forEach(f => console.error(`   \u2022 ${f}`));
   console.error('\nFix these before submitting to the Chrome Web Store.\n');
   process.exit(1);

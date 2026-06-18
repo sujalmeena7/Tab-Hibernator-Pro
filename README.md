@@ -24,13 +24,17 @@
 ## ✨ Features
 
 - **🚀 Smart Inactivity Detection**: Uses a robust single-alarm background sweep (1-min intervals) to monitor tab idle time.
-- **🛡️ Advanced Exclusions**: 
+- **🧠 Memory Pressure Tiers**: Four modes (Off, Conservative, Balanced, Aggressive) so you control exactly how aggressively hibernation kicks in when RAM is tight.
+- **🛡️ Advanced Exclusions**:
+  - **Per-Domain Timeouts**: Override the global inactivity timer for specific sites, or set them to never hibernate.
   - **Audio/Video**: Never suspends playing media (YouTube, Spotify, etc.).
   - **Form Input**: Detects active typing/focus in forms to prevent losing progress.
   - **System Pages**: Ignores pinned tabs and internal browser pages.
+- **⏸ Right-Click Pause**: Pause hibernation on a specific tab for 15 min, 1 hour, until you close it, or never. No more "Restore?" prompts for tabs you want to keep open.
 - **💾 Estimated Savings**: Displays real-time RAM recovery stats (~80MB per tab).
 - **🔄 State Persistence**: Instantly restore tabs with original URL, title, and **scroll position**.
-- **🌑 Modern UI**: Premium dark-mode dashboard and settings page with vanilla CSS glassmorphism.
+- **🖱️ Toolbar Preview**: Hover the extension icon to see a live summary of suspended tabs and memory freed.
+- **🌑 Modern UI**: Premium dark-mode dashboard with framer-motion-style toggles, glassmorphism, and refined typography.
 
 ---
 
@@ -51,9 +55,12 @@
 
 The extension offers a clean options page to customize your experience:
 - **Timeout Slider**: Set inactivity limits from 5 minutes to 4 hours.
+- **Per-Domain Rules**: Override the global timeout (or set to "never") for individual sites.
+- **Memory Tier**: Pick how aggressively hibernation reacts to system RAM pressure.
 - **Whitelist**: Define specific domains to never hibernate.
 - **Battery Saver**: (Optional) Only hibernate when your device is unplugged.
 - **Badge Toggle**: Show/hide the hibernation count on the toolbar icon.
+- **Right-Click Pause**: Pause hibernation on any tab for a fixed duration.
 
 ---
 
