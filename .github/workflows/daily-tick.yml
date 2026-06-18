@@ -1,0 +1,62 @@
+name: Daily tick
+
+# Auto-commit a small timestamped file on weekdays so the contribution
+# graph stays healthy. Runs at 10:30 IST (= 05:30 UTC) which is a
+# natural mid-morning time, not a midnight bot stamp.
+#
+# The workflow is idempotent: if the file already has today's date,
+# it exits early without committing. This means once-a-day max.
+
+on:
+  schedule:
+    # 5:30 UTC = 11:00 IST (10:30 during IST, 11:00 during non-DST IST)
+    - cron: '30 5 * * 1-5'
+  workflow_dispatch: # allow manual trigger for testing
+
+permissions:
+  contents: write
+
+jobs:
+  tick:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure git
+        run: |
+          git config user.name "sujalmeena7"
+          git config user.email "meenasujal60@gmail.com"
+
+      - name: Update daily sync marker
+        run: |
+          mkdir -p .tick
+          TODAY=$(date -u +%Y-%m-%d)
+          MARKER=.tick/last-sync.txt
+
+          # If the file already shows today's date, do nothing (no empty commit).
+          if [ -f "$MARKER" ] && [ "$(cat $MARKER)" = "$TODAY" ]; then
+            echo "Already ticked today ($TODAY). Skipping."
+            exit 0
+          fi
+
+          echo "$TODAY" > $MARKER
+          echo "Updated marker to $TODAY"
+
+      - name: Commit and push
+        run: |
+          git add .tick/last-sync.txt
+          # Only commit if the file actually changed.
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          # Vary the message slightly so the log doesn't look like a stamp.
+          HOUR=$(date -u +%H)
+          if   [ "$HOUR" -lt 9 ];  then MSG="chore: morning sync"
+          elif [ "$HOUR" -lt 14 ]; then MSG="chore: daily sync"
+          elif [ "$HOUR" -lt 18 ]; then MSG="chore: afternoon tick"
+          else                          MSG="chore: end-of-day sync"
+          fi
+          git commit -m "$MSG"
+          git push
