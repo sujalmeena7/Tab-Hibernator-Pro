@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tab Hibernator Pro - Compliance & Support Center</title>
+  <meta name="description" content="Official website and compliance policies for Tab Hibernator Pro, an open-source, privacy-first Chrome Extension for intelligent tab suspension and RAM recovery.">
+  
+  <!-- Modern Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    /* Design Tokens */
+    :root {
+      --bg-main: #0b0f17;
+      --bg-card: rgba(18, 24, 38, 0.7);
+      --bg-card-hover: rgba(26, 34, 52, 0.85);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-color-active: rgba(16, 185, 129, 0.4);
+      --text-primary: #f3f4f6;
+      --text-secondary: #9ca3af;
+      --text-muted: #6b7280;
+      --color-accent: #10b981; /* Emerald/Mint */
+      --color-accent-hover: #34d399;
+      --color-accent-rgb: 16, 185, 129;
+      --font-heading: 'Outfit', sans-serif;
+      --font-body: 'Inter', sans-serif;
+      --transition-speed: 0.3s;
+    }
+
+    /* Reset & General Setup */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      line-height: 1.6;
+      overflow-x: hidden;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(16, 185, 129, 0.05) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(16, 185, 129, 0.03) 0%, transparent 50%);
+    }
+
+    a {
+      color: var(--color-accent);
+      text-decoration: none;
+      transition: color var(--transition-speed) ease;
+    }
+
+    a:hover {
+      color: var(--color-accent-hover);
+      text-decoration: underline;
+    }
+
+    /* Container */
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 0 24px;
+      width: 100%;
+    }
+
+    /* Header & Navigation */
+    header {
+      border-bottom: 1px solid var(--border-color);
+      background: rgba(11, 15, 23, 0.8);
+      backdrop-filter: blur(12px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 16px 0;
+    }
+
+    .header-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: 1.25rem;
+      letter-spacing: -0.5px;
+    }
+
+    .brand-logo {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      border-radius: 8px;
+    }
+
+    .brand-logo svg {
+      width: 18px;
+      height: 18px;
+      fill: var(--color-accent);
+    }
+
+    .nav-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-weight: 500;
+      font-size: 0.875rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all var(--transition-speed) ease;
+    }
+
+    .nav-btn:hover {
+      background: var(--color-accent);
+      border-color: var(--color-accent);
+      color: #fff;
+      text-decoration: none;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+    }
+
+    /* Hero Section */
+    .hero {
+      text-align: center;
+      padding: 60px 0 40px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      color: var(--color-accent-hover);
+      padding: 6px 14px;
+      border-radius: 100px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-bottom: 24px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .badge::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      background: var(--color-accent);
+      border-radius: 50%;
+      display: inline-block;
+      box-shadow: 0 0 8px var(--color-accent);
+    }
+
+    h1 {
+      font-family: var(--font-heading);
+      font-size: 3rem;
+      font-weight: 800;
+      letter-spacing: -1.5px;
+      line-height: 1.15;
+      margin-bottom: 16px;
+      background: linear-gradient(135deg, #ffffff 40%, #10b981 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .tagline {
+      font-size: 1.15rem;
+      color: var(--text-secondary);
+      max-width: 600px;
+      margin: 0 auto 32px;
+    }
+
+    .hero-ctas {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary {
+      background: var(--color-accent);
+      border: 1px solid var(--color-accent);
+      color: #fff;
+      padding: 12px 28px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: all var(--transition-speed) ease;
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-primary:hover {
+      background: var(--color-accent-hover);
+      border-color: var(--color-accent-hover);
+      color: #fff;
+      text-decoration: none;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 12px 28px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: all var(--transition-speed) ease;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.15);
+      color: var(--text-primary);
+      text-decoration: none;
+      transform: translateY(-2px);
+    }
+
+    /* Policy Tabs Component */
+    .policy-container {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      margin-bottom: 80px;
+      overflow: hidden;
+    }
+
+    .tabs-nav {
+      display: flex;
+      border-bottom: 1px solid var(--border-color);
+      background: rgba(0, 0, 0, 0.15);
+      overflow-x: auto;
+    }
+
+    .tab-button {
+      flex: 1;
+      padding: 18px 12px;
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--text-secondary);
+      font-family: var(--font-heading);
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+      transition: all var(--transition-speed) ease;
+      white-space: nowrap;
+      min-width: 140px;
+      outline: none;
+    }
+
+    .tab-button:hover {
+      color: var(--text-primary);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .tab-button.active {
+      color: var(--color-accent-hover);
+      border-bottom-color: var(--color-accent);
+      background: rgba(16, 185, 129, 0.04);
+    }
+
+    /* Policy Content */
+    .policy-content {
+      padding: 40px;
+    }
+
+    .tab-panel {
+      display: none;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+
+    .tab-panel.active {
+      display: block;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .tab-panel h2 {
+      font-family: var(--font-heading);
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 24px;
+      color: var(--text-primary);
+      border-left: 4px solid var(--color-accent);
+      padding-left: 12px;
+    }
+
+    .tab-panel h3 {
+      font-family: var(--font-heading);
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin: 28px 0 12px;
+      color: var(--text-primary);
+    }
+
+    .tab-panel p {
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+      font-size: 0.975rem;
+      line-height: 1.7;
+    }
+
+    .tab-panel ul {
+      margin-bottom: 20px;
+      padding-left: 20px;
+      color: var(--text-secondary);
+      font-size: 0.975rem;
+    }
+
+    .tab-panel li {
+      margin-bottom: 8px;
+    }
+
+    .last-updated {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 40px;
+      border-top: 1px solid var(--border-color);
+      padding-top: 16px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    /* Contact Details Grid */
+    .contact-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      margin-top: 24px;
+    }
+
+    .contact-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-color);
+      padding: 24px;
+      border-radius: 12px;
+      transition: all var(--transition-speed) ease;
+    }
+
+    .contact-card:hover {
+      border-color: var(--border-color-active);
+      background: rgba(16, 185, 129, 0.02);
+      transform: translateY(-2px);
+    }
+
+    .contact-card h4 {
+      font-family: var(--font-heading);
+      color: var(--color-accent-hover);
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .contact-card p {
+      margin-bottom: 0;
+      font-size: 0.9rem;
+    }
+
+    /* Footer */
+    footer {
+      margin-top: auto;
+      border-top: 1px solid var(--border-color);
+      background: rgba(0, 0, 0, 0.2);
+      padding: 32px 0;
+      text-align: center;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .footer-links a {
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .footer-links a:hover {
+      color: var(--color-accent-hover);
+      text-decoration: none;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 2.25rem;
+      }
+      .hero {
+        padding: 40px 0 30px;
+      }
+      .policy-content {
+        padding: 24px;
+      }
+      .tab-button {
+        padding: 14px 10px;
+        font-size: 0.85rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header Navigation -->
+  <header>
+    <div class="container header-nav">
+      <div class="brand">
+        <div class="brand-logo">
+          <!-- Sleeping Leaf Icon -->
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M17 8C8 8 4 14 3 21C6.5 21 11 19 14.5 16.5C18 14 21 9.5 21 3C18 4.5 18 8 17 8Z" />
+            <path d="M9.5 12C9.5 12 7.5 13 6 15C7.5 15 9.5 14 9.5 12Z" opacity="0.7"/>
+          </svg>
+        </div>
+        <span>Tab Hibernator Pro</span>
+      </div>
+      <a href="https://chromewebstore.google.com/detail/tab-hibernator-pro/bckbkkabmjfdnnnkgcghjchpibnkdmdj" target="_blank" rel="noopener" class="nav-btn" id="header-cws-link">
+        <span>Get Extension</span>
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M1.5 10.5L10.5 1.5M10.5 1.5H3M10.5 1.5V9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Hero Content -->
+  <section class="container hero">
+    <div class="badge">Razorpay Verified Merchant Domain</div>
+    <h1>Tab Hibernator Pro</h1>
+    <p class="tagline">Intelligent Tab Suspension & RAM Recovery Engine. Sleeps the tabs you aren't using. Frees up RAM, stays private, and never breaks your flow.</p>
+    <div class="hero-ctas">
+      <a href="https://chromewebstore.google.com/detail/tab-hibernator-pro/bckbkkabmjfdnnnkgcghjchpibnkdmdj" target="_blank" rel="noopener" class="btn-primary" id="hero-install-btn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="21.17" y1="8" x2="12" y2="8"/><line x1="3.95" y1="6.06" x2="8.54" y2="14"/><line x1="10.88" y1="21.94" x2="15.46" y2="14"/>
+        </svg>
+        Install from Chrome Web Store
+      </a>
+      <a href="https://github.com/sujalmeena7/Tab-Hibernator-Pro" target="_blank" rel="noopener" class="btn-secondary" id="hero-github-btn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.9-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.07 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.92 0-1.11.38-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.82-2.34 4.66-4.57 4.91.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0012 2z"/>
+        </svg>
+        View Source Code
+      </a>
+    </div>
+  </section>
+
+  <!-- Interactive Policy tabs -->
+  <main class="container">
+    <div class="policy-container">
+      <nav class="tabs-nav" aria-label="Legal Policies Navigation">
+        <button class="tab-button active" onclick="switchTab(event, 'terms')" id="tab-btn-terms">Terms & Conditions</button>
+        <button class="tab-button" onclick="switchTab(event, 'privacy')" id="tab-btn-privacy">Privacy Policy</button>
+        <button class="tab-button" onclick="switchTab(event, 'refund')" id="tab-btn-refund">Refund & Cancellation</button>
+        <button class="tab-button" onclick="switchTab(event, 'contact')" id="tab-btn-contact">Contact Us</button>
+      </nav>
+
+      <div class="policy-content">
+        <!-- 1. Terms & Conditions -->
+        <div id="terms" class="tab-panel active">
+          <h2>Terms & Conditions</h2>
+          <p>Welcome to Tab Hibernator Pro. By installing, configuring, or using this browser extension, you agree to be bound by the terms and conditions outlined below. If you do not agree, please uninstall the extension immediately.</p>
+          
+          <h3>1. Use License</h3>
+          <p>Tab Hibernator Pro is open-source software distributed under the MIT License. You are permitted to use, modify, and distribute the extension in accordance with the terms of its open-source license. However, repackaging and distributing the extension under a commercial license or selling it without substantial modifications is strictly prohibited.</p>
+          
+          <h3>2. Disclaimer of Warranties</h3>
+          <p>The extension is provided on an "AS IS" and "AS AVAILABLE" basis, without warranties or conditions of any kind, either express or implied, including, without limitation, any warranties of merchantability, fitness for a particular purpose, or non-infringement. You are solely responsible for determining the appropriateness of using this software and assume any risks associated with its execution.</p>
+          
+          <h3>3. Limitation of Liability</h3>
+          <p>In no event and under no legal theory, whether in tort (including negligence), contract, or otherwise, shall the developer (Sujal Meena) be liable to you for damages, including any direct, indirect, special, incidental, or consequential damages of any character arising as a result of this Agreement or out of the use or inability to use the extension, including but not limited to loss of data, browser crashes, system instability, or loss of productivity.</p>
+          
+          <h3>4. Modifications to Terms</h3>
+          <p>We reserve the right to revise these Terms & Conditions at any time. When updates are made, the revision date at the bottom of the page will be updated. Your continued use of the extension following any updates constitutes acceptance of the new terms.</p>
+
+          <div class="last-updated">
+            <span>Last Updated: June 21, 2026</span>
+            <span>Version: 2.0.2</span>
+          </div>
+        </div>
+
+        <!-- 2. Privacy Policy -->
+        <div id="privacy" class="tab-panel">
+          <h2>Privacy Policy</h2>
+          <p>Tab Hibernator Pro is committed to protecting your privacy. We believe in absolute transparency: we do not collect, transmit, store, track, or sell your personal data.</p>
+          
+          <h3>1. Zero Data Collection</h3>
+          <p>All operations of the extension run entirely on your local machine. No information regarding your tabs, browsed URLs, exclusion lists, configuration profiles, or system specs is ever transmitted to us or any third-party servers.</p>
+          
+          <h3>2. Chrome Storage APIs</h3>
+          <p>The extension utilizes Chrome's local storage APIs (<code>chrome.storage.local</code>) to store your customization settings (e.g., custom timeouts, whitelisted domains, and theme choices). This data never leaves your local browser profile.</p>
+          
+          <h3>3. External Connections</h3>
+          <p>Tab Hibernator Pro does not establish connections with external tracking services, analytics engines, or telemetry pipelines. Our listing on the Chrome Web Store is the sole point of distribution.</p>
+          
+          <h3>4. Children's Privacy</h3>
+          <p>Since we collect no information whatsoever, we do not knowingly collect or solicit any data from children under the age of 13.</p>
+
+          <div class="last-updated">
+            <span>Last Updated: June 21, 2026</span>
+            <span>Version: 2.0.2</span>
+          </div>
+        </div>
+
+        <!-- 3. Refund & Cancellation Policy -->
+        <div id="refund" class="tab-panel">
+          <h2>Refund & Cancellation Policy</h2>
+          <p>Tab Hibernator Pro is a digital productivity utility. We want you to be completely satisfied with your experience. Below are the terms governing payments, voluntary support, upgrades, and refunds.</p>
+          
+          <h3>1. 14-Day Money-Back Guarantee</h3>
+          <p>If you purchase a paid license, upgrade, or choose to support the project via a voluntary financial contribution and are not satisfied with your experience, you are entitled to a full refund within **14 days** of the original payment transaction date.</p>
+          
+          <h3>2. Refund Request Process</h3>
+          <p>To request a refund, please send an email to <a href="mailto:meenasujal60@gmail.com">meenasujal60@gmail.com</a> with the subject line <strong>"Refund Request - Tab Hibernator Pro"</strong> and include your payment reference ID (provided in your Razorpay invoice). We will process your refund within <strong>5–7 business days</strong>. The amount will be credited back to your original payment method.</p>
+          
+          <h3>3. Service Cancellations</h3>
+          <p>If you have subscribed to a recurring contribution plan, you may cancel your subscription at any time. Cancellations will take effect immediately, and no future payments will be charged. Previous payments outside the 14-day window are non-refundable.</p>
+
+          <div class="last-updated">
+            <span>Last Updated: June 21, 2026</span>
+            <span>Version: 2.0.2</span>
+          </div>
+        </div>
+
+        <!-- 4. Contact Us -->
+        <div id="contact" class="tab-panel">
+          <h2>Contact Us</h2>
+          <p>If you have any questions about these policies, need technical assistance, or want to inquire about payment status and transactions, please feel free to reach out to us. We aim to reply to all queries within 24–48 hours.</p>
+          
+          <div class="contact-grid">
+            <div class="contact-card">
+              <h4>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
+                </svg>
+                Customer Support Email
+              </h4>
+              <p><a href="mailto:meenasujal60@gmail.com">meenasujal60@gmail.com</a></p>
+            </div>
+            <div class="contact-card">
+              <h4>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                </svg>
+                Developer Entity
+              </h4>
+              <p>Sujal Meena</p>
+            </div>
+            <div class="contact-card">
+              <h4>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
+                </svg>
+                GitHub Project
+              </h4>
+              <p><a href="https://github.com/sujalmeena7/Tab-Hibernator-Pro" target="_blank" rel="noopener">sujalmeena7/Tab-Hibernator-Pro</a></p>
+            </div>
+          </div>
+
+          <div class="last-updated">
+            <span>Last Updated: June 21, 2026</span>
+            <span>Version: 2.0.2</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="footer-links">
+        <a href="#terms" onclick="switchTabByHash('terms')">Terms of Service</a>
+        <a href="#privacy" onclick="switchTabByHash('privacy')">Privacy Policy</a>
+        <a href="#refund" onclick="switchTabByHash('refund')">Refund Policy</a>
+        <a href="#contact" onclick="switchTabByHash('contact')">Support</a>
+      </div>
+      <p>&copy; 2026 Tab Hibernator Pro. All rights reserved. Distributed under MIT License.</p>
+      <p style="margin-top: 8px; font-size: 0.75rem;">This site is the official compliance, payments, and policy verification domain for the Tab Hibernator Pro extension on the Chrome Web Store.</p>
+    </div>
+  </footer>
+
+  <!-- Tabs Switch Logic -->
+  <script>
+    function switchTab(event, panelId) {
+      // Hide all panels
+      const panels = document.querySelectorAll('.tab-panel');
+      panels.forEach(panel => {
+        panel.classList.remove('active');
+      });
+
+      // Deactivate all tab buttons
+      const buttons = document.querySelectorAll('.tab-button');
+      buttons.forEach(button => {
+        button.classList.remove('active');
+      });
+
+      // Show current panel & activate tab button
+      const activePanel = document.getElementById(panelId);
+      if (activePanel) {
+        activePanel.classList.add('active');
+      }
+
+      if (event && event.currentTarget) {
+        event.currentTarget.classList.add('active');
+      } else {
+        const correspondingBtn = document.getElementById(`tab-btn-${panelId}`);
+        if (correspondingBtn) {
+          correspondingBtn.classList.add('active');
+        }
+      }
+    }
+
+    function switchTabByHash(panelId) {
+      switchTab(null, panelId);
+      document.getElementById('tab-btn-' + panelId).scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Support deep-linking to policy tabs via URL hashes
+    window.addEventListener('DOMContentLoaded', () => {
+      const hash = window.location.hash.substring(1);
+      if (['terms', 'privacy', 'refund', 'contact'].includes(hash)) {
+        switchTab(null, hash);
+      }
+    });
+  </script>
+</body>
+</html>
