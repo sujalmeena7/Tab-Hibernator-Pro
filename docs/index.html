@@ -14,14 +14,15 @@
   <style>
     /* Design Tokens */
     :root {
-      --bg-main: #0b0f17;
-      --bg-card: rgba(18, 24, 38, 0.7);
-      --bg-card-hover: rgba(26, 34, 52, 0.85);
-      --border-color: rgba(255, 255, 255, 0.08);
-      --border-color-active: rgba(16, 185, 129, 0.4);
-      --text-primary: #f3f4f6;
+      --bg-main: #060913;
+      --bg-card: rgba(13, 19, 36, 0.45);
+      --bg-card-hover: rgba(22, 33, 62, 0.7);
+      --border-color: rgba(255, 255, 255, 0.05);
+      --border-color-hover: rgba(16, 185, 129, 0.25);
+      --border-color-active: rgba(16, 185, 129, 0.45);
+      --text-primary: #f9fafb;
       --text-secondary: #9ca3af;
-      --text-muted: #6b7280;
+      --text-muted: #4b5563;
       --color-accent: #10b981; /* Emerald/Mint */
       --color-accent-hover: #34d399;
       --color-accent-rgb: 16, 185, 129;
@@ -46,9 +47,19 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      background-image: 
-        radial-gradient(circle at 10% 20%, rgba(16, 185, 129, 0.05) 0%, transparent 40%),
-        radial-gradient(circle at 90% 80%, rgba(16, 185, 129, 0.03) 0%, transparent 50%);
+      position: relative;
+    }
+
+    /* Fixed Background Canvas */
+    #bg-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: -1;
+      pointer-events: none;
+      background: radial-gradient(circle at 50% 50%, #0e172a 0%, #060913 100%);
     }
 
     a {
@@ -64,7 +75,7 @@
 
     /* Container */
     .container {
-      max-width: 1000px;
+      max-width: 1100px;
       margin: 0 auto;
       padding: 0 24px;
       width: 100%;
@@ -73,8 +84,9 @@
     /* Header & Navigation */
     header {
       border-bottom: 1px solid var(--border-color);
-      background: rgba(11, 15, 23, 0.8);
-      backdrop-filter: blur(12px);
+      background: rgba(6, 9, 19, 0.7);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
       position: sticky;
       top: 0;
       z-index: 100;
@@ -93,40 +105,47 @@
       gap: 12px;
       font-family: var(--font-heading);
       font-weight: 700;
-      font-size: 1.25rem;
+      font-size: 1.3rem;
       letter-spacing: -0.5px;
+      cursor: pointer;
     }
 
     .brand-logo {
-      width: 32px;
-      height: 32px;
+      width: 36px;
+      height: 36px;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: rgba(16, 185, 129, 0.1);
-      border: 1px solid rgba(16, 185, 129, 0.3);
-      border-radius: 8px;
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(16, 185, 129, 0.1);
+      transition: transform var(--transition-speed) ease;
+    }
+
+    .brand:hover .brand-logo {
+      transform: rotate(-10deg) scale(1.05);
     }
 
     .brand-logo svg {
-      width: 18px;
-      height: 18px;
+      width: 20px;
+      height: 20px;
       fill: var(--color-accent);
     }
 
     .nav-btn {
-      background: rgba(255, 255, 255, 0.05);
+      background: rgba(255, 255, 255, 0.03);
       border: 1px solid var(--border-color);
       color: var(--text-primary);
-      padding: 8px 16px;
-      border-radius: 8px;
-      font-weight: 500;
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-weight: 600;
       font-size: 0.875rem;
       cursor: pointer;
       display: flex;
       align-items: center;
       gap: 8px;
-      transition: all var(--transition-speed) ease;
+      transition: all var(--transition-speed) cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .nav-btn:hover {
@@ -134,29 +153,37 @@
       border-color: var(--color-accent);
       color: #fff;
       text-decoration: none;
-      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+      box-shadow: 0 0 25px rgba(16, 185, 129, 0.3);
+      transform: translateY(-1px);
     }
 
     /* Hero Section */
     .hero {
       text-align: center;
-      padding: 60px 0 40px;
+      padding: 90px 0 50px;
     }
 
     .badge {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      background: rgba(16, 185, 129, 0.1);
+      gap: 8px;
+      background: rgba(16, 185, 129, 0.08);
       border: 1px solid rgba(16, 185, 129, 0.2);
       color: var(--color-accent-hover);
-      padding: 6px 14px;
+      padding: 6px 16px;
       border-radius: 100px;
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       font-weight: 600;
       margin-bottom: 24px;
-      letter-spacing: 0.5px;
+      letter-spacing: 1px;
       text-transform: uppercase;
+      animation: pulse 3s infinite;
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.2); }
+      70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
     }
 
     .badge::before {
@@ -171,21 +198,22 @@
 
     h1 {
       font-family: var(--font-heading);
-      font-size: 3rem;
+      font-size: 3.5rem;
       font-weight: 800;
-      letter-spacing: -1.5px;
-      line-height: 1.15;
-      margin-bottom: 16px;
-      background: linear-gradient(135deg, #ffffff 40%, #10b981 100%);
+      letter-spacing: -2px;
+      line-height: 1.1;
+      margin-bottom: 20px;
+      background: linear-gradient(135deg, #ffffff 30%, var(--color-accent-hover) 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
 
     .tagline {
-      font-size: 1.15rem;
+      font-size: 1.2rem;
       color: var(--text-secondary);
-      max-width: 600px;
-      margin: 0 auto 32px;
+      max-width: 650px;
+      margin: 0 auto 36px;
+      font-weight: 400;
     }
 
     .hero-ctas {
@@ -199,16 +227,16 @@
       background: var(--color-accent);
       border: 1px solid var(--color-accent);
       color: #fff;
-      padding: 12px 28px;
-      border-radius: 8px;
+      padding: 14px 32px;
+      border-radius: 10px;
       font-weight: 600;
       font-size: 1rem;
       cursor: pointer;
       display: flex;
       align-items: center;
       gap: 10px;
-      transition: all var(--transition-speed) ease;
-      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+      transition: all var(--transition-speed) cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 5px 20px rgba(16, 185, 129, 0.25);
     }
 
     .btn-primary:hover {
@@ -216,90 +244,212 @@
       border-color: var(--color-accent-hover);
       color: #fff;
       text-decoration: none;
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
     }
 
     .btn-secondary {
-      background: rgba(255, 255, 255, 0.03);
+      background: rgba(255, 255, 255, 0.02);
       border: 1px solid var(--border-color);
       color: var(--text-primary);
-      padding: 12px 28px;
-      border-radius: 8px;
+      padding: 14px 32px;
+      border-radius: 10px;
       font-weight: 600;
       font-size: 1rem;
       cursor: pointer;
       display: flex;
       align-items: center;
       gap: 10px;
-      transition: all var(--transition-speed) ease;
+      transition: all var(--transition-speed) cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .btn-secondary:hover {
-      background: rgba(255, 255, 255, 0.08);
-      border-color: rgba(255, 255, 255, 0.15);
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.12);
       color: var(--text-primary);
       text-decoration: none;
-      transform: translateY(-2px);
+      transform: translateY(-3px);
     }
 
-    /* Policy Tabs Component */
-    .policy-container {
+    /* Scroll Reveal Animation Framework */
+    .scroll-reveal {
+      opacity: 0;
+      transform: translateY(40px);
+      filter: blur(4px);
+      transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1), 
+                  transform 1s cubic-bezier(0.16, 1, 0.3, 1), 
+                  filter 1s cubic-bezier(0.16, 1, 0.3, 1);
+      will-change: transform, opacity, filter;
+    }
+
+    .scroll-reveal.revealed {
+      opacity: 1;
+      transform: translateY(0);
+      filter: blur(0);
+    }
+
+    /* Features Grid Section */
+    .features-section {
+      padding: 60px 0 80px;
+    }
+
+    .section-title {
+      text-align: center;
+      font-family: var(--font-heading);
+      font-size: 2.25rem;
+      font-weight: 800;
+      letter-spacing: -1px;
+      margin-bottom: 48px;
+    }
+
+    .section-title span {
+      background: linear-gradient(135deg, #fff 40%, var(--color-accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 24px;
+    }
+
+    .feature-card {
       background: var(--bg-card);
       border: 1px solid var(--border-color);
       border-radius: 16px;
-      backdrop-filter: blur(16px);
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-      margin-bottom: 80px;
+      padding: 32px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      transition: border-color var(--transition-speed) ease,
+                  box-shadow var(--transition-speed) ease;
+      will-change: transform;
+      transform-style: preserve-3d;
+    }
+
+    .feature-card:hover {
+      border-color: var(--border-color-hover);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), 
+                  0 0 20px rgba(16, 185, 129, 0.05);
+    }
+
+    .feature-icon {
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(16, 185, 129, 0.06);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      border-radius: 12px;
+      margin-bottom: 20px;
+      color: var(--color-accent-hover);
+      transform: translateZ(20px);
+    }
+
+    .feature-card h3 {
+      font-family: var(--font-heading);
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      transform: translateZ(15px);
+      color: var(--text-primary);
+    }
+
+    .feature-card p {
+      color: var(--text-secondary);
+      font-size: 0.925rem;
+      line-height: 1.6;
+      transform: translateZ(10px);
+    }
+
+    /* Policy Tabs Component */
+    .policy-section {
+      padding-bottom: 100px;
+    }
+
+    .policy-container {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 24px;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
       overflow: hidden;
+      transform-style: preserve-3d;
+    }
+
+    /* Animated Slide Tabs Navigation */
+    .tabs-nav-wrapper {
+      position: relative;
+      background: rgba(0, 0, 0, 0.25);
+      border-bottom: 1px solid var(--border-color);
+      padding: 6px;
     }
 
     .tabs-nav {
       display: flex;
-      border-bottom: 1px solid var(--border-color);
-      background: rgba(0, 0, 0, 0.15);
+      position: relative;
       overflow-x: auto;
+      scrollbar-width: none; /* Firefox */
+    }
+
+    .tabs-nav::-webkit-scrollbar {
+      display: none; /* Chrome/Safari */
+    }
+
+    /* Sliding pill tracer */
+    .tab-indicator {
+      position: absolute;
+      top: 6px;
+      left: 6px;
+      height: calc(100% - 12px);
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      border-radius: 12px;
+      transition: all 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+      z-index: 0;
+      pointer-events: none;
     }
 
     .tab-button {
       flex: 1;
-      padding: 18px 12px;
+      padding: 16px 20px;
       background: transparent;
       border: none;
-      border-bottom: 2px solid transparent;
       color: var(--text-secondary);
       font-family: var(--font-heading);
       font-size: 0.95rem;
       font-weight: 600;
       cursor: pointer;
       text-align: center;
-      transition: all var(--transition-speed) ease;
+      transition: color var(--transition-speed) ease;
       white-space: nowrap;
-      min-width: 140px;
+      min-width: 150px;
       outline: none;
+      z-index: 1;
+      border-radius: 12px;
     }
 
     .tab-button:hover {
       color: var(--text-primary);
-      background: rgba(255, 255, 255, 0.02);
     }
 
     .tab-button.active {
       color: var(--color-accent-hover);
-      border-bottom-color: var(--color-accent);
-      background: rgba(16, 185, 129, 0.04);
     }
 
     /* Policy Content */
     .policy-content {
-      padding: 40px;
+      padding: 48px;
     }
 
     .tab-panel {
       display: none;
       opacity: 0;
-      transform: translateY(10px);
-      transition: opacity 0.4s ease, transform 0.4s ease;
+      transform: translateY(15px);
+      transition: opacity 0.5s cubic-bezier(0.25, 1, 0.5, 1), 
+                  transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
     }
 
     .tab-panel.active {
@@ -310,46 +460,57 @@
 
     .tab-panel h2 {
       font-family: var(--font-heading);
-      font-size: 1.75rem;
-      font-weight: 700;
+      font-size: 2rem;
+      font-weight: 800;
       margin-bottom: 24px;
       color: var(--text-primary);
-      border-left: 4px solid var(--color-accent);
-      padding-left: 12px;
+      position: relative;
+      padding-bottom: 8px;
+    }
+
+    .tab-panel h2::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 40px;
+      height: 3px;
+      background: var(--color-accent);
+      border-radius: 2px;
     }
 
     .tab-panel h3 {
       font-family: var(--font-heading);
-      font-size: 1.15rem;
-      font-weight: 600;
-      margin: 28px 0 12px;
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin: 32px 0 12px;
       color: var(--text-primary);
     }
 
     .tab-panel p {
       color: var(--text-secondary);
-      margin-bottom: 16px;
+      margin-bottom: 18px;
       font-size: 0.975rem;
-      line-height: 1.7;
+      line-height: 1.75;
     }
 
     .tab-panel ul {
-      margin-bottom: 20px;
+      margin-bottom: 24px;
       padding-left: 20px;
       color: var(--text-secondary);
       font-size: 0.975rem;
     }
 
     .tab-panel li {
-      margin-bottom: 8px;
+      margin-bottom: 10px;
     }
 
     .last-updated {
       font-size: 0.8rem;
       color: var(--text-muted);
-      margin-top: 40px;
+      margin-top: 48px;
       border-top: 1px solid var(--border-color);
-      padding-top: 16px;
+      padding-top: 20px;
       display: flex;
       justify-content: space-between;
     }
@@ -358,62 +519,69 @@
     .contact-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 20px;
-      margin-top: 24px;
+      gap: 24px;
+      margin-top: 32px;
     }
 
     .contact-card {
-      background: rgba(255, 255, 255, 0.02);
+      background: rgba(255, 255, 255, 0.015);
       border: 1px solid var(--border-color);
-      padding: 24px;
-      border-radius: 12px;
+      padding: 28px;
+      border-radius: 16px;
       transition: all var(--transition-speed) ease;
+      transform-style: preserve-3d;
     }
 
     .contact-card:hover {
-      border-color: var(--border-color-active);
-      background: rgba(16, 185, 129, 0.02);
-      transform: translateY(-2px);
+      border-color: var(--border-color-hover);
+      background: rgba(16, 185, 129, 0.01);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
     }
 
     .contact-card h4 {
       font-family: var(--font-heading);
       color: var(--color-accent-hover);
-      font-size: 1rem;
-      font-weight: 600;
-      margin-bottom: 8px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 10px;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
+      transform: translateZ(10px);
     }
 
     .contact-card p {
       margin-bottom: 0;
-      font-size: 0.9rem;
+      font-size: 0.925rem;
+      transform: translateZ(5px);
     }
 
     /* Footer */
     footer {
       margin-top: auto;
       border-top: 1px solid var(--border-color);
-      background: rgba(0, 0, 0, 0.2);
-      padding: 32px 0;
+      background: rgba(6, 9, 19, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      padding: 40px 0;
       text-align: center;
       font-size: 0.875rem;
       color: var(--text-muted);
+      z-index: 10;
     }
 
     .footer-links {
       display: flex;
       justify-content: center;
-      gap: 24px;
-      margin-bottom: 16px;
+      gap: 32px;
+      margin-bottom: 20px;
       flex-wrap: wrap;
     }
 
     .footer-links a {
       color: var(--text-secondary);
       font-weight: 500;
+      transition: color var(--transition-speed) ease;
     }
 
     .footer-links a:hover {
@@ -424,27 +592,31 @@
     /* Responsive adjustments */
     @media (max-width: 768px) {
       h1 {
-        font-size: 2.25rem;
+        font-size: 2.5rem;
       }
       .hero {
-        padding: 40px 0 30px;
+        padding: 60px 0 30px;
       }
       .policy-content {
-        padding: 24px;
+        padding: 28px;
       }
       .tab-button {
-        padding: 14px 10px;
-        font-size: 0.85rem;
+        padding: 14px 12px;
+        font-size: 0.875rem;
+        min-width: 130px;
       }
     }
   </style>
 </head>
 <body>
 
+  <!-- Background Particle Engine -->
+  <canvas id="bg-canvas"></canvas>
+
   <!-- Header Navigation -->
   <header>
     <div class="container header-nav">
-      <div class="brand">
+      <div class="brand" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
         <div class="brand-logo">
           <!-- Sleeping Leaf Icon -->
           <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -454,7 +626,7 @@
         </div>
         <span>Tab Hibernator Pro</span>
       </div>
-      <a href="https://chromewebstore.google.com/detail/tab-hibernator-pro/bckbkkabmjfdnnnkgcghjchpibnkdmdj" target="_blank" rel="noopener" class="nav-btn" id="header-cws-link">
+      <a href="https://chromewebstore.google.com/detail/tab-hibernator-pro/lbabbhdapcdblnboodlljafchidhamka" target="_blank" rel="noopener" class="nav-btn" id="header-cws-link">
         <span>Get Extension</span>
         <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M1.5 10.5L10.5 1.5M10.5 1.5H3M10.5 1.5V9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -464,12 +636,12 @@
   </header>
 
   <!-- Main Hero Content -->
-  <section class="container hero">
+  <section class="container hero scroll-reveal">
     <div class="badge">Razorpay Verified Merchant Domain</div>
     <h1>Tab Hibernator Pro</h1>
     <p class="tagline">Intelligent Tab Suspension & RAM Recovery Engine. Sleeps the tabs you aren't using. Frees up RAM, stays private, and never breaks your flow.</p>
     <div class="hero-ctas">
-      <a href="https://chromewebstore.google.com/detail/tab-hibernator-pro/bckbkkabmjfdnnnkgcghjchpibnkdmdj" target="_blank" rel="noopener" class="btn-primary" id="hero-install-btn">
+      <a href="https://chromewebstore.google.com/detail/tab-hibernator-pro/lbabbhdapcdblnboodlljafchidhamka" target="_blank" rel="noopener" class="btn-primary" id="hero-install-btn">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="21.17" y1="8" x2="12" y2="8"/><line x1="3.95" y1="6.06" x2="8.54" y2="14"/><line x1="10.88" y1="21.94" x2="15.46" y2="14"/>
         </svg>
@@ -484,15 +656,68 @@
     </div>
   </section>
 
+  <!-- Features Grid -->
+  <section class="container features-section scroll-reveal">
+    <h2 class="section-title">Engineered for <span>Performance</span></h2>
+    <div class="features-grid">
+      <!-- Feature 1 -->
+      <div class="feature-card tilt-target">
+        <div class="feature-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/>
+          </svg>
+        </div>
+        <h3>Frees Up RAM</h3>
+        <p>Intelligently puts inactive tabs to sleep, reclaiming up to 80MB of RAM per tab to keep your system fast and responsive.</p>
+      </div>
+
+      <!-- Feature 2 -->
+      <div class="feature-card tilt-target">
+        <div class="feature-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+        </div>
+        <h3>Exclusion Protection</h3>
+        <p>Avoids tab hibernation when media is playing, files are downloading, pins are active, or when forms are actively filled.</p>
+      </div>
+
+      <!-- Feature 3 -->
+      <div class="feature-card tilt-target">
+        <div class="feature-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+        </div>
+        <h3>Custom Overrides</h3>
+        <p>Set per-domain timeouts or whitelist entire sites entirely so specific apps stay active as long as you need them.</p>
+      </div>
+
+      <!-- Feature 4 -->
+      <div class="feature-card tilt-target">
+        <div class="feature-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1"/><line x1="12" y1="19" x2="12" y2="22"/>
+          </svg>
+        </div>
+        <h3>Privacy First</h3>
+        <p>Operates client-side only. Zero trackers, zero analytics, and zero external transmission. Your data is strictly yours.</p>
+      </div>
+    </div>
+  </section>
+
   <!-- Interactive Policy tabs -->
-  <main class="container">
+  <section class="container policy-section scroll-reveal">
     <div class="policy-container">
-      <nav class="tabs-nav" aria-label="Legal Policies Navigation">
-        <button class="tab-button active" onclick="switchTab(event, 'terms')" id="tab-btn-terms">Terms & Conditions</button>
-        <button class="tab-button" onclick="switchTab(event, 'privacy')" id="tab-btn-privacy">Privacy Policy</button>
-        <button class="tab-button" onclick="switchTab(event, 'refund')" id="tab-btn-refund">Refund & Cancellation</button>
-        <button class="tab-button" onclick="switchTab(event, 'contact')" id="tab-btn-contact">Contact Us</button>
-      </nav>
+      <div class="tabs-nav-wrapper">
+        <div class="tab-indicator" id="tab-pill"></div>
+        <nav class="tabs-nav" aria-label="Legal Policies Navigation" id="tabs-container">
+          <button class="tab-button active" onclick="switchTab(event, 'terms')" id="tab-btn-terms">Terms & Conditions</button>
+          <button class="tab-button" onclick="switchTab(event, 'privacy')" id="tab-btn-privacy">Privacy Policy</button>
+          <button class="tab-button" onclick="switchTab(event, 'refund')" id="tab-btn-refund">Refund & Cancellation</button>
+          <button class="tab-button" onclick="switchTab(event, 'contact')" id="tab-btn-contact">Contact Us</button>
+        </nav>
+      </div>
 
       <div class="policy-content">
         <!-- 1. Terms & Conditions -->
@@ -567,7 +792,7 @@
           <p>If you have any questions about these policies, need technical assistance, or want to inquire about payment status and transactions, please feel free to reach out to us. We aim to reply to all queries within 24–48 hours.</p>
           
           <div class="contact-grid">
-            <div class="contact-card">
+            <div class="contact-card tilt-target">
               <h4>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
@@ -576,7 +801,7 @@
               </h4>
               <p><a href="mailto:meenasujal60@gmail.com">meenasujal60@gmail.com</a></p>
             </div>
-            <div class="contact-card">
+            <div class="contact-card tilt-target">
               <h4>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
@@ -585,7 +810,7 @@
               </h4>
               <p>Sujal Meena</p>
             </div>
-            <div class="contact-card">
+            <div class="contact-card tilt-target">
               <h4>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
@@ -603,7 +828,7 @@
         </div>
       </div>
     </div>
-  </main>
+  </section>
 
   <!-- Footer -->
   <footer>
@@ -615,12 +840,244 @@
         <a href="#contact" onclick="switchTabByHash('contact')">Support</a>
       </div>
       <p>&copy; 2026 Tab Hibernator Pro. All rights reserved. Distributed under MIT License.</p>
-      <p style="margin-top: 8px; font-size: 0.75rem;">This site is the official compliance, payments, and policy verification domain for the Tab Hibernator Pro extension on the Chrome Web Store.</p>
+      <p style="margin-top: 8px; font-size: 0.75rem; color: #374151;">This site is the official compliance, payments, and policy verification domain for the Tab Hibernator Pro extension on the Chrome Web Store.</p>
     </div>
   </footer>
 
-  <!-- Tabs Switch Logic -->
+  <!-- Interactive JavaScript Upgrades -->
   <script>
+    // -------------------------------------------------------------
+    // 1. Interactive 3D Perspective Particle Network Background
+    // -------------------------------------------------------------
+    const canvas = document.getElementById('bg-canvas');
+    const ctx = canvas.getContext('2d');
+
+    let particles = [];
+    const particleCount = 75;
+    const connectionDistance = 140;
+    const focalLength = 300;
+
+    let mouseX = 0;
+    let mouseY = 0;
+    let targetRotX = 0;
+    let targetRotY = 0;
+    let rotX = 0;
+    let rotY = 0;
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    // Initialize 3D Particles
+    for (let i = 0; i < particleCount; i++) {
+      particles.push({
+        x: (Math.random() - 0.5) * window.innerWidth * 1.5,
+        y: (Math.random() - 0.5) * window.innerHeight * 1.5,
+        z: (Math.random() - 0.5) * 800,
+        vx: (Math.random() - 0.5) * 0.5,
+        vy: (Math.random() - 0.5) * 0.5,
+        vz: (Math.random() - 0.5) * 0.5,
+        radius: Math.random() * 2 + 1
+      });
+    }
+
+    // Capture mouse movement for parallax tilt
+    window.addEventListener('mousemove', (e) => {
+      mouseX = e.clientX - window.innerWidth / 2;
+      mouseY = e.clientY - window.innerHeight / 2;
+      targetRotY = (mouseX / window.innerWidth) * 0.25;
+      targetRotX = -(mouseY / window.innerHeight) * 0.25;
+    });
+
+    // 3D rotation helper
+    function rotateY(p, angle) {
+      const cos = Math.cos(angle);
+      const sin = Math.sin(angle);
+      const x = p.x * cos - p.z * sin;
+      const z = p.z * cos + p.x * sin;
+      return { ...p, x, z };
+    }
+
+    function rotateX(p, angle) {
+      const cos = Math.cos(angle);
+      const sin = Math.sin(angle);
+      const y = p.y * cos - p.z * sin;
+      const z = p.z * cos + p.y * sin;
+      return { ...p, y, z };
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Smooth interpolation of mouse rotation
+      rotX += (targetRotX - rotX) * 0.05;
+      rotY += (targetRotY - rotY) * 0.05;
+
+      // Add a slow auto-rotation
+      const autoAngleY = 0.001;
+      const autoAngleX = 0.0005;
+
+      // Map transformed 2D projected particles
+      const projected = particles.map(p => {
+        // Move particle
+        p.x += p.vx;
+        p.y += p.vy;
+        p.z += p.vz;
+
+        // Boundaries check (wrap around)
+        const boundaryWidth = window.innerWidth * 0.75;
+        const boundaryHeight = window.innerHeight * 0.75;
+        const boundaryDepth = 400;
+
+        if (p.x < -boundaryWidth) p.vx *= -1;
+        if (p.x > boundaryWidth) p.vx *= -1;
+        if (p.y < -boundaryHeight) p.vy *= -1;
+        if (p.y > boundaryHeight) p.vy *= -1;
+        if (p.z < -boundaryDepth) p.vz *= -1;
+        if (p.z > boundaryDepth) p.vz *= -1;
+
+        // Apply interactive + auto rotation
+        let rotated = rotateY(p, rotY + autoAngleY);
+        rotated = rotateX(rotated, rotX + autoAngleX);
+
+        // Project into 2D screen space
+        const scale = focalLength / (focalLength + rotated.z);
+        const x2d = rotated.x * scale + canvas.width / 2;
+        const y2d = rotated.y * scale + canvas.height / 2;
+
+        return {
+          x: x2d,
+          y: y2d,
+          z: rotated.z,
+          scale: scale,
+          radius: p.radius
+        };
+      });
+
+      // Draw Connection Lines based on depth proximity
+      ctx.strokeStyle = `rgba(16, 185, 129, 0.07)`;
+      ctx.lineWidth = 0.8;
+      for (let i = 0; i < projected.length; i++) {
+        for (let j = i + 1; j < projected.length; j++) {
+          const p1 = projected[i];
+          const p2 = projected[j];
+
+          // Distance in 2D space
+          const dx = p1.x - p2.x;
+          const dy = p1.y - p2.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+
+          if (dist < connectionDistance) {
+            // Fade lines based on distance and projection scale
+            const alpha = (1 - dist / connectionDistance) * 0.45 * Math.min(p1.scale, p2.scale);
+            ctx.strokeStyle = `rgba(16, 185, 129, ${alpha})`;
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.stroke();
+          }
+        }
+      }
+
+      // Draw Particles
+      projected.forEach(p => {
+        if (p.x >= 0 && p.x <= canvas.width && p.y >= 0 && p.y <= canvas.height) {
+          // Adjust transparency by depth
+          const alpha = Math.min(1, Math.max(0.1, p.scale)) * 0.6;
+          ctx.fillStyle = `rgba(52, 211, 153, ${alpha})`;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.radius * p.scale, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      });
+
+      requestAnimationFrame(draw);
+    }
+    requestAnimationFrame(draw);
+
+
+    // -------------------------------------------------------------
+    // 2. Framer Motion style Scroll Reveal (Intersection Observer)
+    // -------------------------------------------------------------
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.1
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('revealed');
+          observer.unobserve(entry.target); // Reveal once
+        }
+      });
+    }, observerOptions);
+
+    document.querySelectorAll('.scroll-reveal').forEach(el => {
+      observer.observe(el);
+    });
+
+
+    // -------------------------------------------------------------
+    // 3. Dynamic 3D Cursor-Tracking Card Tilt Effect
+    // -------------------------------------------------------------
+    document.querySelectorAll('.tilt-target').forEach(card => {
+      card.addEventListener('mousemove', (e) => {
+        const rect = card.getBoundingClientRect();
+        
+        // Find relative coordinates inside the card
+        const x = e.clientX - rect.left - rect.width / 2;
+        const y = e.clientY - rect.top - rect.height / 2;
+
+        // Map relative coordinates to rotation angles (limit to +/- 10 degrees)
+        const factor = 12;
+        const rotateYAngle = (x / (rect.width / 2)) * factor;
+        const rotateXAngle = -(y / (rect.height / 2)) * factor;
+
+        card.style.transform = `perspective(1000px) rotateX(${rotateXAngle}deg) rotateY(${rotateYAngle}deg) translateY(-5px)`;
+      });
+
+      card.addEventListener('mouseleave', () => {
+        card.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0)`;
+      });
+    });
+
+
+    // -------------------------------------------------------------
+    // 4. Sliding Pill Tab Highlight Navigation
+    // -------------------------------------------------------------
+    const tabsContainer = document.getElementById('tabs-container');
+    const tabPill = document.getElementById('tab-pill');
+
+    function updateTabPill(activeBtn) {
+      if (!activeBtn) return;
+      const rect = activeBtn.getBoundingClientRect();
+      const parentRect = tabsContainer.getBoundingClientRect();
+      
+      // Calculate coordinates relative to parent
+      const offsetLeft = rect.left - parentRect.left + tabsContainer.scrollLeft;
+      
+      tabPill.style.width = `${rect.width}px`;
+      tabPill.style.transform = `translateX(${offsetLeft}px)`;
+    }
+
+    // Initial pill placement
+    window.addEventListener('load', () => {
+      const activeBtn = document.querySelector('.tab-button.active');
+      updateTabPill(activeBtn);
+    });
+
+    // Resize observer to recalculate pill bounds on browser resize
+    const resizeObserver = new ResizeObserver(() => {
+      const activeBtn = document.querySelector('.tab-button.active');
+      updateTabPill(activeBtn);
+    });
+    resizeObserver.observe(tabsContainer);
+
     function switchTab(event, panelId) {
       // Hide all panels
       const panels = document.querySelectorAll('.tab-panel');
@@ -640,26 +1097,37 @@
         activePanel.classList.add('active');
       }
 
+      let activeBtn;
       if (event && event.currentTarget) {
-        event.currentTarget.classList.add('active');
+        activeBtn = event.currentTarget;
       } else {
-        const correspondingBtn = document.getElementById(`tab-btn-${panelId}`);
-        if (correspondingBtn) {
-          correspondingBtn.classList.add('active');
-        }
+        activeBtn = document.getElementById(`tab-btn-${panelId}`);
+      }
+
+      if (activeBtn) {
+        activeBtn.classList.add('active');
+        updateTabPill(activeBtn);
+        // Scroll navigation tab into view if overflowed on mobile
+        activeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
       }
     }
 
     function switchTabByHash(panelId) {
       switchTab(null, panelId);
-      document.getElementById('tab-btn-' + panelId).scrollIntoView({ behavior: 'smooth' });
+      const activeBtn = document.getElementById('tab-btn-' + panelId);
+      if (activeBtn) {
+        activeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      }
+      document.querySelector('.policy-section').scrollIntoView({ behavior: 'smooth' });
     }
 
     // Support deep-linking to policy tabs via URL hashes
     window.addEventListener('DOMContentLoaded', () => {
       const hash = window.location.hash.substring(1);
       if (['terms', 'privacy', 'refund', 'contact'].includes(hash)) {
-        switchTab(null, hash);
+        setTimeout(() => {
+          switchTab(null, hash);
+        }, 100);
       }
     });
   </script>
