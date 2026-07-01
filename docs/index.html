@@ -594,6 +594,187 @@
       text-decoration: none;
     }
 
+
+    /* Pricing Tab Styles */
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 32px;
+      margin: 36px 0 48px;
+    }
+
+    .pricing-card {
+      background: rgba(13, 19, 36, 0.3);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 40px 32px;
+      position: relative;
+      transition: all var(--transition-speed) ease;
+      display: flex;
+      flex-direction: column;
+      transform-style: preserve-3d;
+    }
+
+    .pricing-card.featured {
+      background: rgba(16, 185, 129, 0.03);
+      border-color: rgba(16, 185, 129, 0.2);
+    }
+
+    .pricing-card:hover {
+      border-color: var(--border-color-hover);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3), 0 0 20px rgba(16, 185, 129, 0.05);
+    }
+
+    .pricing-card.featured:hover {
+      border-color: var(--color-accent);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), 0 0 25px rgba(16, 185, 129, 0.15);
+    }
+
+    .pricing-badge {
+      position: absolute;
+      top: 20px;
+      right: 24px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-secondary);
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 100px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .pricing-badge.special {
+      background: rgba(16, 185, 129, 0.15);
+      border-color: rgba(16, 185, 129, 0.3);
+      color: var(--color-accent-hover);
+    }
+
+    .pricing-card h3 {
+      font-size: 1.5rem;
+      margin-bottom: 8px;
+    }
+
+    .price {
+      font-size: 2.5rem;
+      font-weight: 800;
+      font-family: var(--font-heading);
+      color: var(--text-primary);
+      margin: 16px 0 4px;
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+    }
+
+    .price .currency {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--color-accent);
+    }
+
+    .price .period {
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+      font-weight: 400;
+    }
+
+    .price-subtitle {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-bottom: 28px;
+    }
+
+    .pricing-features {
+      list-style: none;
+      padding-left: 0 !important;
+      margin-bottom: 36px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .pricing-features li {
+      font-size: 0.925rem;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 0 !important;
+    }
+
+    .check-icon {
+      color: var(--color-accent);
+      font-weight: 800;
+    }
+
+    .pricing-action {
+      margin-top: auto;
+    }
+
+    .pricing-btn {
+      display: block;
+      width: 100%;
+      text-align: center;
+      padding: 14px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: all var(--transition-speed) ease;
+    }
+
+    .free-btn {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      cursor: default;
+    }
+
+    .support-btn {
+      background: var(--color-accent);
+      border: 1px solid var(--color-accent);
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);
+    }
+
+    .support-btn:hover {
+      background: var(--color-accent-hover);
+      border-color: var(--color-accent-hover);
+      color: #fff;
+      text-decoration: none;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);
+    }
+
+    /* FAQ Section styling */
+    .faq-section {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      margin: 24px 0 0;
+    }
+
+    .faq-item {
+      background: rgba(255, 255, 255, 0.01);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .faq-item h4 {
+      font-family: var(--font-heading);
+      color: var(--text-primary);
+      font-size: 1rem;
+      margin-bottom: 8px;
+    }
+
+    .faq-item p {
+      font-size: 0.9rem !important;
+      color: var(--text-secondary);
+      margin-bottom: 0 !important;
+      line-height: 1.5;
+    }
+
     /* Responsive adjustments */
     @media (max-width: 768px) {
       h1 {
@@ -657,6 +838,12 @@
         </svg>
         View Source Code
       </a>
+      <a href="#pricing" onclick="switchTabByHash('pricing')" class="btn-secondary" id="hero-pricing-btn" style="border-color: rgba(16, 185, 129, 0.35); color: var(--color-accent-hover);">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="4" width="20" height="16" rx="2"/><line x1="12" y1="10" x2="12" y2="18"/><line x1="8" y1="14" x2="16" y2="14"/>
+        </svg>
+        Pricing & Support
+      </a>
     </div>
   </section>
 
@@ -718,6 +905,7 @@
         <nav class="tabs-nav" aria-label="Legal Policies Navigation" id="tabs-container">
           <button class="tab-button active" onclick="switchTab(event, 'terms')" id="tab-btn-terms">Terms & Conditions</button>
           <button class="tab-button" onclick="switchTab(event, 'privacy')" id="tab-btn-privacy">Privacy Policy</button>
+          <button class="tab-button" onclick="switchTab(event, 'pricing')" id="tab-btn-pricing">Pricing & Support</button>
           <button class="tab-button" onclick="switchTab(event, 'refund')" id="tab-btn-refund">Refund & Cancellation</button>
           <button class="tab-button" onclick="switchTab(event, 'contact')" id="tab-btn-contact">Contact Us</button>
         </nav>
@@ -763,6 +951,75 @@
           
           <h3>4. Children's Privacy</h3>
           <p>Since we collect no information whatsoever, we do not knowingly collect or solicit any data from children under the age of 13.</p>
+
+          <div class="last-updated">
+            <span>Last Updated: June 21, 2026</span>
+            <span>Version: 2.0.2</span>
+          </div>
+        </div>
+
+        <!-- Pricing & Support -->
+        <div id="pricing" class="tab-panel">
+          <h2>Pricing & Support</h2>
+          <p>Tab Hibernator Pro is built on open-source principles. We believe that productivity tools should be accessible to everyone, which is why the core extension is completely free. Below are the details regarding our pricing structure and voluntary contributions.</p>
+          
+          <div class="pricing-grid">
+            <!-- Free Plan -->
+            <div class="pricing-card tilt-target">
+              <div class="pricing-badge">Default</div>
+              <h3>Free Plan</h3>
+              <div class="price">
+                <span class="currency">$</span>0<span class="period">/ lifetime</span>
+              </div>
+              <p class="price-subtitle">For personal and commercial use</p>
+              <ul class="pricing-features">
+                <li><span class="check-icon">✓</span> Intelligent tab suspension</li>
+                <li><span class="check-icon">✓</span> Memory & RAM recovery</li>
+                <li><span class="check-icon">✓</span> Automatic exclusion rules</li>
+                <li><span class="check-icon">✓</span> Domain-level whitelist configuration</li>
+                <li><span class="check-icon">✓</span> Open-source access (MIT License)</li>
+                <li><span class="check-icon">✓</span> Zero data collection / Privacy-first</li>
+              </ul>
+              <div class="pricing-action">
+                <a href="https://chromewebstore.google.com/detail/tab-hibernator-pro/lbabbhdapcdblnboodlljafchidhamka" target="_blank" rel="noopener" class="pricing-btn free-btn">Installed by Default</a>
+              </div>
+            </div>
+
+            <!-- Voluntary Support -->
+            <div class="pricing-card tilt-target featured">
+              <div class="pricing-badge special">Voluntary Support</div>
+              <h3>Pay What You Want</h3>
+              <div class="price">
+                <span class="currency">Custom</span><span class="period"> / one-time or recurring</span>
+              </div>
+              <p class="price-subtitle">Help support ongoing open-source development</p>
+              <ul class="pricing-features">
+                <li><span class="check-icon">✓</span> Fund feature updates & security audits</li>
+                <li><span class="check-icon">✓</span> Directly support independent developer</li>
+                <li><span class="check-icon">✓</span> Optional email support response</li>
+                <li><span class="check-icon">✓</span> Keeps the extension ad-free & open</li>
+              </ul>
+              <div class="pricing-action">
+                <a href="https://rzp.io/rzp/ihYPBim" target="_blank" rel="noopener" class="pricing-btn support-btn">Support via Razorpay</a>
+              </div>
+            </div>
+          </div>
+
+          <h3>Pricing & Compliance FAQ</h3>
+          <div class="faq-section">
+            <div class="faq-item">
+              <h4>Are there any hidden costs or paywalled features?</h4>
+              <p>No. Tab Hibernator Pro is completely free to install and use. There are no paid upgrades, paywalls, or hidden charges for any feature of the extension. The payment link is strictly for voluntary developer support.</p>
+            </div>
+            <div class="faq-item">
+              <h4>What payment methods are supported?</h4>
+              <p>Through Razorpay, we accept international credit & debit cards (Visa, Mastercard, American Express), digital wallets, and UPI payments (for users based in India).</p>
+            </div>
+            <div class="faq-item">
+              <h4>Is my payment secure?</h4>
+              <p>Yes. All transactions are securely processed by Razorpay, a PCI-DSS certified payment processor. We do not store or capture any card or payment credential information.</p>
+            </div>
+          </div>
 
           <div class="last-updated">
             <span>Last Updated: June 21, 2026</span>
@@ -840,6 +1097,7 @@
       <div class="footer-links">
         <a href="#terms" onclick="switchTabByHash('terms')">Terms of Service</a>
         <a href="#privacy" onclick="switchTabByHash('privacy')">Privacy Policy</a>
+        <a href="#pricing" onclick="switchTabByHash('pricing')">Pricing & Support</a>
         <a href="#refund" onclick="switchTabByHash('refund')">Refund Policy</a>
         <a href="#contact" onclick="switchTabByHash('contact')">Support</a>
       </div>
@@ -1128,7 +1386,7 @@
     // Support deep-linking to policy tabs via URL hashes
     window.addEventListener('DOMContentLoaded', () => {
       const hash = window.location.hash.substring(1);
-      if (['terms', 'privacy', 'refund', 'contact'].includes(hash)) {
+      if (['terms', 'privacy', 'pricing', 'refund', 'contact'].includes(hash)) {
         setTimeout(() => {
           switchTab(null, hash);
         }, 100);
